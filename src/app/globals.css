@@ -1,21 +1,47 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/*
-  Tailwind v4 기준
-  다크모드의 "유일한 책임자"는 html 태그다
-*/
-
-html {
-    background-color: white;
-    color: rgb(17 24 39);
+html, body {
+    height: 100%;
 }
 
-html.dark {
-    background-color: rgb(10 10 10);
-    color: rgb(243 244 246);
+/* ===== 기본 (pink) ===== */
+:root {
+    --accent: #f25555;
+    --accent-hover: #e64b4b;
+    --accent-soft: rgba(242, 85, 85, 0.15);
 }
 
-/* 기본 body 리셋 */
-body {
-    min-height: 100vh;
+/* ===== dark + pink ===== */
+.dark {
+    --accent: #ff7a7a;
+    --accent-hover: #ff9a9a;
+    --accent-soft: rgba(255, 122, 122, 0.18);
+}
+
+/* ===== blue ===== */
+.theme-blue {
+    --accent: #364f6b;
+    --accent-hover: #2c415a;
+    --accent-soft: rgba(54, 79, 107, 0.15);
+}
+
+.dark.theme-blue {
+    --accent: #7aa2ff;
+    --accent-hover: #9bb8ff;
+    --accent-soft: rgba(122, 162, 255, 0.18);
+}
+
+/* ===== navy ===== */
+.theme-navy {
+    --accent: #1f2a37;
+    --accent-hover: #18202b;
+    --accent-soft: rgba(31, 42, 55, 0.15);
+}
+
+.dark.theme-navy {
+    --accent: #8aa4c8;
+    --accent-hover: #a4bce0;
+    --accent-soft: rgba(138, 164, 200, 0.18);
 }
