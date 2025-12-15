@@ -1,19 +1,12 @@
 "use client";
 
-/**
- * 전역 Provider 묶음
- * - Redux
- * - Apollo
- * - Theme
- * - Toast
- */
 
 import { ReactNode } from "react";
 import { Provider as ReduxProvider } from "react-redux";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 
-import { store } from "@/store";
+import { store } from "@/api/store";
 import { apolloClient } from "@/lib/apollo/clients";
 import {ApolloProvider} from "@apollo/client/react";
 

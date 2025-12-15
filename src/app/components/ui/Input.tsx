@@ -1,71 +1,79 @@
-"use client"
-
-
-// input 공용 컴포넌트
+"use client";
 
 type InputProps = {
-//   label
-  label?: string;
-  // 유효성 검사 실패시 메세지
-  error?: string;
+    label?: string;
+    error?: string;
 } & React.InputHTMLAttributes<HTMLInputElement>;
 
 export default function Input({
-                                label,
-                                error,
-                                ...props
+                                  label,
+                                  error,
+                                  id,
+                                  ...props
                               }: InputProps) {
-  return (
-    <div className="space-y-1">
-      {/*  label 영역*/}
-      {label && (
-        <label className="
-          text-sm
-          text-text-muted-light
-          dark:text-text-muted-dark
-          ">
-          {label}
-        </label>
-      )}
-      {/*  input 영역 */}
-      <input
-        {...props}
-        className={`
-        w-full h-11
-        rounded-md
-        // 배경색
-        bg-white
-        dark:bg-background-dark
-        // 테두리
-        border
-        border-border-light
-        dark:border-border-dark
-        // 내부 여백
-        px-3
-        text-sm
-        
-        transition-colors
-        duration-150
-        ease-in-out
-        
-        focus:outline-none
-        focus:ring-1
-        focus:ring-accent
-        
-        // 비활성화 상태
-        disabled:opacity-50
-        disabled:cursor-not-allowed
-        // 에러
-        ${error ? "border-red-500" : ""}
-        `}
-      />
+    return (
+        <div className="space-y-1">
+            {/* label */}
+            {label && (
+                <label
+                    htmlFor={id}
+                    className="
+            text-sm
+            text-text-muted-light
+            dark:text-text-muted-dark
+          "
+                >
+                    {label}
+                </label>
+            )}
 
-      {/*  error 메세지*/}
-      {error && (
-        <p className="text-xs text-red-500">
-          {error}
-        </p>
-      )}
-    </div>
-  )
+            {/* input */}
+            <input
+                id={id}
+                aria-invalid={!!error}
+                {...props}
+                className={`
+          w-full h-11
+          rounded-md
+
+          bg-white
+          dark:bg-surface-input
+
+          border
+          border-border-light
+          dark:border-white/10
+
+          px-3
+          text-sm
+          leading-normal
+
+          text-text-primary-light
+          dark:text-text-primary-dark
+
+          placeholder:text-text-muted-light
+          dark:placeholder:text-text-muted-dark
+
+          caret-accent
+
+          transition-colors duration-150 ease-in-out
+          focus:outline-none
+          focus:ring-2
+          focus:ring-accent
+          focus:border-accent
+
+          disabled:opacity-50
+          disabled:cursor-not-allowed
+
+          ${error ? "border-red-500 focus:ring-red-500 caret-red-500" : ""}
+        `}
+            />
+
+            {/* error message */}
+            {error && (
+                <p className="text-xs text-red-500">
+                    {error}
+                </p>
+            )}
+        </div>
+    );
 }

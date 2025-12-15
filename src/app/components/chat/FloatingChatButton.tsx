@@ -1,7 +1,7 @@
 "use client";
 
 import { useDispatch } from "react-redux";
-import { toggleChat } from "@/store/slice/uislice";
+import { toggleChat } from "@/api/slice/uislice";
 import CharacterAvatar from "./CharacterAvatar";
 
 /**

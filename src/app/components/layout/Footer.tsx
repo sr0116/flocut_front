@@ -11,8 +11,10 @@ export default function Footer() {
       className="
         w-full
         bg-white
+        border-t border-gray-200
         dark:bg-surface-dark
         dark:border-border-dark
+
       "
     >
       <div className="mx-auto max-w-7xl px-6 py-10">

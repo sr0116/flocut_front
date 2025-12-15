@@ -9,14 +9,14 @@ html, body {
 /* ===== 기본 (pink) ===== */
 :root {
     --accent: #f25555;
-    --accent-hover: #e64b4b;
+    --accent-hover: #d93f3f;   /* 더 확실하게 */
     --accent-soft: rgba(242, 85, 85, 0.15);
 }
 
 /* ===== dark + pink ===== */
 .dark {
     --accent: #ff7a7a;
-    --accent-hover: #ff9a9a;
+    --accent-hover: #ff5c5c;
     --accent-soft: rgba(255, 122, 122, 0.18);
 }
 

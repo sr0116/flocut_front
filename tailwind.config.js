@@ -18,11 +18,14 @@ module.exports = {
         },
         surface: {
           light: "#f5f6f8",
-          dark: "#151821", // Linear surface
+            // 다크 모드 계층
+            dark: "#171b26",    // 카드
+            input: "#111726",   // 인풋
+            hover: "#1e2433",
         },
         border: {
           light: "#e4e6eb",
-          dark: "#232633",
+            dark: "rgba(255,255,255,0.08)"
         },
         text: {
           primary: {

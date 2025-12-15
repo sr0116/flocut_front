@@ -7,6 +7,7 @@ import { Providers } from "@/provider/Providers";
 import FloatingChatButton from "@/app/components/chat/FloatingChatButton";
 import ChatDrawer from "@/app/components/chat/ChatDrawer";
 import {notoSans} from "@/app/font";
+import GlobalLoader from "@/app/components/layout/loading/GlobalLoader";
 
 
 export const metadata: Metadata = {
@@ -30,6 +31,7 @@ export default function RootLayout({
         `}
     >
     <Providers>
+        <GlobalLoader />
       <Header />
       <main className="min-h-screen">
         {children}
