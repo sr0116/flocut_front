@@ -3,8 +3,8 @@
 import { useState } from "react";
 import SignupForm from "@/app/components/auth/SignupForm";
 
-import Button from "@/app/components/ui/Button";
-import Card from "@/app/components/ui/form/Card";
+import Button from "@/app/components/ui/button/Button";
+import Card from "@/app/components/ui/card/Card";
 import Input from "@/app/components/ui/form/Input";
 
 export default function SignupPage() {

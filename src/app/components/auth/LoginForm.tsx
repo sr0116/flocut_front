@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 
-import Card from "@/app/components/ui/form/Card";
+import Card from "@/app/components/ui/card/Card";
 import Form from "@/app/components/ui/form/Form";
 import Input from "@/app/components/ui/form/Input";
-import Button from "@/app/components/ui/Button";
+import Button from "@/app/components/ui/button/Button";
 
 export default function LoginForm() {
   // ===== 입력 값 상태 =====

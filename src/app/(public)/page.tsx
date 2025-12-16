@@ -27,9 +27,9 @@ export default function HomePage() {
         <NoticeSection />
       </Section>
 
-      <Section variant="gradient">
-        <FlowExplainSection />
-      </Section>
+      {/*<Section variant="gradient">*/}
+      {/*  <FlowExplainSection />*/}
+      {/*</Section>*/}
 
       <Section>
         <ReplaceWorkSection />

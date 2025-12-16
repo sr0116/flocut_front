@@ -1,28 +1,31 @@
 "use client";
 
+import React from "react";
 
 type Variant = "primary" | "secondary" | "ghost" | "oauth";
 type Size = "sm" | "md" | "lg";
 
-type ButtonProps =
-    React.ButtonHTMLAttributes<HTMLButtonElement> & {
+
+export type ButtonProps = {
     variant?: Variant;
     size?: Size;
     loading?: boolean;
-};
+} & Omit<
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
+    "children"
+>;
 
 // type = "button", 명시적으로 해둔 이유는 기본적으로 폼을 건드리지 않는다라는 안전 장치로 해둠
-
 export default function Button({
                                    children,
                                    variant = "primary",
                                    size = "md",
                                    loading = false,
                                    disabled,
-                                   type = "button",
+                                   type = "button", // form 안전장치
                                    className = "",
-                                   ...props
-                               }: ButtonProps) {
+                                   ...props // ← 여기로 표준 button props 전부 들어온다
+                               }: React.PropsWithChildren<ButtonProps>) {
     const base = `
     inline-flex items-center justify-center gap-2
     rounded-md
