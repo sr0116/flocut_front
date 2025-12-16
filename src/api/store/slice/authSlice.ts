@@ -1,41 +1,37 @@
 // src/store/authSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
+export interface AuthUser {
+    memberId: number;
+    email: string;
+    name: string;
+}
+
 interface AuthState {
-  isAuthenticated: boolean;
-  memberId?: number;
-  accessToken?: string;
+    isAuthenticated: boolean;
+    user?: AuthUser;
 }
 
 const initialState: AuthState = {
-  isAuthenticated: false,
+    isAuthenticated: false,
+    user: undefined,
 };
 
 const authSlice = createSlice({
-  name: "auth",
-  initialState,
-  reducers: {
-    loginSuccess(
-      state,
-      action: PayloadAction<{
-        memberId: number;
-        accessToken: string;
-      }>
-    ) {
-      //   백엔드에서 처리하니까 엑세스토큰이 필요없을 수 있음 확인 필요
-      //   이니셜 -> 로딩이랑 에러 같이 넣는 경우
-      state.isAuthenticated = true;
-      state.memberId = action.payload.memberId;
-      state.accessToken = action.payload.accessToken;
-    },
+    name: "auth",
+    initialState,
+    reducers: {
+        setAuthUser(state, action: PayloadAction<AuthUser>) {
+            state.isAuthenticated = true;
+            state.user = action.payload;
+        },
 
-    logout(state) {
-      state.isAuthenticated = false;
-      state.memberId = undefined;
-      state.accessToken = undefined;
+        clearAuth(state) {
+            state.isAuthenticated = false;
+            state.user = undefined;
+        },
     },
-  },
 });
 
-export const { loginSuccess, logout } = authSlice.actions;
+export const { setAuthUser, clearAuth } = authSlice.actions;
 export default authSlice.reducer;
