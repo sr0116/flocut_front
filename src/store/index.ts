@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
-import authReducer from "@/api/store/slice/authSlice";
-import uiReducer from "@/api/store/slice/uislice";
-import chatReducer from "@/api/store/slice/chatSlice"; // 추가
+import authReducer from "@/store/slice/authSlice";
+import uiReducer from "@/store/slice/uislice";
+import chatReducer from "@/store/slice/chatSlice"; // 추가
 
 export const index = configureStore({
   reducer: {
