@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import ContextPanel from "@/app/components/layout/WorkspaceLayout/ContextPanel";
-import EditorContainer from "@/app/components/layout/editor/EditorContainer";
+import EditorContainer from "@/app/components/notes/editor/EditorContainer";
 
 export default function EditorPage({ noteId }: { noteId: string }) {
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
