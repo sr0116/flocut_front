@@ -1,35 +1,50 @@
 "use client";
 
 import { useState } from "react";
-import ContextPanel from "@/app/components/layout/WorkspaceLayout/ContextPanel";
 import EditorContainer from "@/app/components/notes/editor/EditorContainer";
+import ContextPanel from "@/app/components/layout/WorkspaceLayout/ContextPanel";
 
-export default function EditorPage({ noteId }: { noteId: string }) {
-  const [rightPanelOpen, setRightPanelOpen] = useState(false);
-  const [panelMode, setPanelMode] = useState("properties");
+type ContextPanelMode =
+    | "properties"
+    | "ai-summary"
+    | "ai-feedback"
+    | "ai-compare"
+    | "versions"
+    | "comments"
+    | "calendar";
 
-  const openPanel = (mode: any) => {
-    setPanelMode(mode);
-    setRightPanelOpen(true);
-  };
+interface EditorPageProps {
+    noteId: string;
+}
 
-  return (
-    <div className="flex h-full">
-      <EditorContainer
-        noteId={noteId}
-        onAIAction={openPanel}
-        onToggleRightPanel={() => setRightPanelOpen(!rightPanelOpen)}
-        rightPanelOpen={rightPanelOpen}
-      />
+export default function EditorPage({ noteId }: EditorPageProps) {
+    const [rightPanelOpen, setRightPanelOpen] = useState(false);
+    const [panelMode, setPanelMode] = useState<ContextPanelMode>("properties");
 
-      {rightPanelOpen && (
-        <ContextPanel
-          mode={panelMode as any}
-          noteId={noteId}
-          onClose={() => setRightPanelOpen(false)}
-          onChangeMode={setPanelMode}
-        />
-      )}
-    </div>
-  );
+    const openPanel = (mode: ContextPanelMode) => {
+        setPanelMode(mode);
+        setRightPanelOpen(true);
+    };
+
+    return (
+        <div className="flex-1 flex overflow-hidden">
+            {/* 에디터 영역 */}
+            <EditorContainer
+                noteId={noteId}
+                onAIAction={(mode) => openPanel(`ai-${mode}` as ContextPanelMode)}
+                onToggleRightPanel={() => setRightPanelOpen(!rightPanelOpen)}
+                rightPanelOpen={rightPanelOpen}
+            />
+
+            {/* 컨텍스트 패널 */}
+            {rightPanelOpen && (
+                <ContextPanel
+                    mode={panelMode}
+                    noteId={noteId}
+                    onClose={() => setRightPanelOpen(false)}
+                    onChangeMode={setPanelMode}
+                />
+            )}
+        </div>
+    );
 }

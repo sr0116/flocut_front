@@ -2,21 +2,31 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { login } from "@/lib/auth";
+import { useAuth } from "@/hooks/useAuth";
 
 import Card from "@/app/components/ui/card/Card";
 import Form from "@/app/components/ui/form/Form";
 import Input from "@/app/components/ui/form/Input";
 import Button from "@/app/components/ui/button/Button";
 
+import { googleLoginHandler } from "@/lib/rest/auth.social";
+
 export default function LoginForm() {
     const router = useRouter();
+    const { login } = useAuth();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    /**
+     * 로그인 흐름
+     * 1. POST /auth/login → 쿠키 발급
+     * 2. GET /auth/me → 사용자 조회
+     * 3. Redux 저장
+     * 4. 홈으로 이동
+     */
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setLoading(true);
@@ -25,13 +35,12 @@ export default function LoginForm() {
         try {
             await login(email, password);
             router.replace("/");
-        } catch (e) {
+        } catch {
             setError("이메일 또는 비밀번호가 올바르지 않습니다.");
         } finally {
             setLoading(false);
         }
     }
-
 
     return (
         <div className="w-full max-w-[420px]">
@@ -53,14 +62,22 @@ export default function LoginForm() {
                     />
 
                     {error && (
-                        <p className="text-sm text-red-500 text-center">{error}</p>
+                        <p className="text-sm text-red-500 text-center">
+                            {error}
+                        </p>
                     )}
 
                     <Button type="submit" className="w-full" loading={loading}>
                         로그인
                     </Button>
 
-                    <Button type="button" variant="oauth" className="w-full">
+                    {/* 소셜 로그인 */}
+                    <Button
+                        type="button"
+                        variant="oauth"
+                        className="w-full"
+                        onClick={googleLoginHandler}
+                    >
                         Google로 로그인
                     </Button>
                 </Form>
