@@ -1,18 +1,14 @@
-import { SocialProvider, SocialLoginWindowOptions } from "./auth.social.types";
+export function googleLoginHandler() {
+  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!;
+  const redirectUri = "http://localhost:3000/auth/google/callback";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
+  const googleAuthUrl =
+    "https://accounts.google.com/o/oauth2/v2/auth" +
+    `?client_id=${clientId}` +
+    `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+    "&response_type=code" +
+    "&scope=openid%20email%20profile";
 
-export function openSocialLogin(
-    provider: SocialProvider,
-    options: SocialLoginWindowOptions = {}
-) {
-    const { width = 500, height = 600, name = `${provider}Login` } = options;
-
-    window.open(
-        `${BASE_URL}/oauth2/authorization/${provider}`,
-        name,
-        `width=${width},height=${height}`
-    );
+  // 구글 로그인 페이지로 직접 이동
+  window.location.href = googleAuthUrl;
 }
-
-export const googleLoginHandler = () => openSocialLogin("google");
