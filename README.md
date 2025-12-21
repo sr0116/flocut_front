@@ -125,6 +125,101 @@
   - 요청/응답 DTO
   - 세션 기반 도메인 모델
   - AI 호출 흐름 명확화
+---
+### 2/18 (목) - 인증 API 프록시 연동 및 기본 인증 플로우 구축
+
+- Next.js API Proxy 구조 확정
+  - api/proxy/* 구조를 인증 API의 단일 진입점으로 확정
+  - 프론트엔드에서 백엔드 API 직접 호출 구조 제거
+  - 모든 인증 관련 요청을 /api/proxy 경유 방식으로 통일
+
+- 기본 로그인 API 연동
+  - /auth/login API 연동 완료
+  - 로그인 성공 시 accessToken, refreshToken 쿠키 발급 확인
+  - 로그인 이후 /auth/me 조회 정상 동작 확인
+
+- 로그아웃 API 연동
+  - 로그아웃 요청 시 서버 세션 종료 확인
+  - 로그아웃 시 인증 쿠키 삭제 정상 동작 확인
+
+- 회원가입 API 연동
+  - 회원가입 요청 → 백엔드 정상 처리 확인
+  - 회원가입 이후 인증 흐름 문제 없음 확인
+
+- Google OAuth 소셜 로그인 1차 연동
+  - Google OAuth 인증 → 콜백 → 백엔드 로그인 처리 흐름 검증
+  - 소셜 로그인 이후 쿠키 발급 및 인증 상태 유지 확인
+
+- 인증 관련 REST API 프론트 연동 완료
+  - 로그인 / 로그아웃 / 회원가입 / 소셜 로그인 전체 플로우 프론트엔드 연동 완료
+
+
+### 12/19 (금) - Refresh Token 재발급 및 메일 인증 연동
+
+- Refresh Token 기반 인증 구조 점검
+  - Access Token 만료 시 /auth/refresh 호출 구조 설계
+  - Refresh Token은 HttpOnly 쿠키 기반으로 관리하도록 확정
+
+- Axios Interceptor 기반 토큰 재발급 로직 구현
+  - Axios response interceptor에서 401 응답 감지
+  - Access Token 만료 시 refresh 요청 1회 시도
+  - Refresh 실패 시 강제 로그아웃 이벤트 발생 처리
+
+- 메일 인증 로직 연동
+  - 회원가입 시 인증 메일 발송 플로우 확인
+  - 프론트엔드에서 Gmail 기반 메일 발송 연동
+  - 인증 메일 발송 및 실제 사용자 수신 여부 확인
+
+- 예외 케이스 정리
+  - 인증 실패 케이스 정리
+  - 토큰 만료 시나리오 및 처리 흐름 문서화
+
+
+### 12/21 (일) - 인증 아키텍처 리팩토링 및 안정화 
+
+- 인증 구조 전면 재설계
+  - 인증 책임을 레이어별로 명확히 분리
+  - Middleware / Client / API 역할 재정의
+
+- Middleware 역할 재정의
+  - 보안 경계 역할만 수행하도록 축소
+  - 보호된 경로 접근 시 완전 비로그인 상태만 차단
+  - 리다이렉트 판단 등 UX 로직은 클라이언트로 이관
+
+- 보호 경로 관리 구조 개선
+  - PROTECTED_PATHS 상수화
+  - isProtectedPath() 유틸 함수 분리
+  - 인증 로직 중복 제거
+
+- Axios Interceptor 로직 안정화
+  - /auth/login, /auth/refresh, /auth/google 요청 interceptor 예외 처리
+  - /auth/me의 401 응답을 “비로그인 정상 상태”로 처리
+  - Refresh 무한 루프 발생 원인 추적 및 차단
+
+- 인증 상태 관리 구조 개선
+  - useAuthActions
+    - 로그인 / 로그아웃 / 인증 동기화 책임 전담
+  - useAuthState
+    - Redux 인증 상태 조회 전용 훅
+  - AuthProvider 역할 단순화
+
+- 인증 동기화 구조 정리
+  - 인증 동기화 로직 중복 제거
+  - auth:logout 이벤트 수신 후 라우팅 처리 전담
+  - ClientUIShell에서 초기 auth.sync() 단 1회 호출
+  - 앱 시작 시 서버 기준 인증 상태 동기화
+
+- 컴포넌트 인증 의존성 정리
+  - Header / Login / Signup 컴포넌트에서 직접 API 호출 제거
+  - Redux 인증 상태 기반 UI 분기 구조로 통일
+
+- Google 소셜 로그인 이슈 추적
+  - 기본 로그인과 소셜 로그인 간 쿠키 발급 타이밍 차이 확인
+  - /auth/me → /auth/refresh 연쇄 401 문제 로그 분석 및 원인 파악
+
+- 전체 인증 흐름 문서화
+  - Middleware / Axios / React / Redux 간 인증 책임 분리 명확화
+  - 인증 아키텍처 전반 문서 정리 완료
 
 ---
 
