@@ -60,11 +60,11 @@ export default function NotesListView({ notes }: { notes: any[] }) {
             </p>
 
             {/* tags */}
-            <div className="flex gap-1 mt-2">
-              {note.tags.slice(0, 2).map((tag) => (
-                <Tag key={tag}>{tag}</Tag>
-              ))}
-            </div>
+          {/*  <div className="flex gap-1 mt-2">*/}
+          {/*    {note.tags.slice(0, 2).map((tag) => (*/}
+          {/*      <Tag key={tag}>{tag}</Tag>*/}
+          {/*    ))}*/}
+          {/*  </div>*/}
           </div>
 
           {/* 오른쪽 metadata */}

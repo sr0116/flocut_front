@@ -1,6 +1,11 @@
 import EditorPage from "@/app/components/notes/editor/EditorPage";
 
+export default async function NoteDetailPage({
+                                               params,
+                                             }: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
 
-export default function NoteDetailPage({ params }: { params: { id: string } }) {
-  return <EditorPage noteId={params.id} />;
+  return <EditorPage noteId={id} />;
 }

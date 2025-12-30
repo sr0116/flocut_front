@@ -1,13 +1,9 @@
 "use client";
 
 import {use, useState} from "react";
-import UploadHeader from "@/app/components/header/UploadHeader";
 import NotesFilterBar from "@/app/components/notes/NotesFilterBar";
 import NotesGridView from "@/app/components/notes/NotesGridView";
 import NotesListView from "@/app/components/notes/NotesListView";
-import ContextPanel from "@/app/components/layout/WorkspaceLayout/ContextPanel";
-import {useRouter} from "next/navigation";
-import EditorContainer from "@/app/components/notes/editor/EditorContainer";
 
 export default function NotesPage({
                                     params,
@@ -55,25 +51,10 @@ export default function NotesPage({
     },
   ];
 
-  // const { id } = use(params);
-  // const router = useRouter();
-  // const [contextPanelOpen, setContextPanelOpen] = useState(false);
-  // const [contextPanelMode, setContextPanelMode] = useState<
-  //   "properties" | "ai-summary" | "ai-feedback" | "ai-compare" | "versions" | "comments"
-  // >("properties");
-  //
-  // const handleOpenContextPanel = (
-  //   mode: "properties" | "ai-summary" | "ai-feedback" | "ai-compare" | "versions" | "comments"
-  // ) => {
-  //   setContextPanelMode(mode);
-  //   setContextPanelOpen(true);
-  // };
-
-
   return (
     <div className="h-full flex flex-col bg-background-light dark:bg-background-dark">
       {/* 상단 헤더 */}
-      <UploadHeader total={notes.length} />
+
 
       {/* 필터 / 정렬 / 뷰 모드 */}
       <NotesFilterBar

@@ -73,7 +73,7 @@ async function proxy(request: NextRequest) {
     method: request.method,
     headers,
     body,
-    duplex: body ? "half" : undefined,
+    ...(body ? ({ duplex: "half" } as any) : {}),
     credentials: "include",
   });
 
