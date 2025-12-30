@@ -1,9 +1,9 @@
-// src/app/(public)/layout.tsx
-import type { Metadata } from "next";
-import { cookies } from "next/headers";
 
+import type { Metadata } from "next";
 import Header from "@/app/components/layout/Header";
-import ClientUIShell from "@/app/components/layout/ClientUIShell";
+import Footer from "@/app/components/layout/Footer";
+import FloatingChatButton from "@/app/components/chatbot/FloatingChatButton";
+import ChatDrawer from "@/app/components/chatbot/ChatDrawer";
 
 export const metadata: Metadata = {
   title: "FLOCUT",
@@ -19,12 +19,13 @@ export default async function PublicLayout({
   return (
     <>
       <Header  />
-
       <main className="min-h-screen pt-16">
-        <ClientUIShell>
           {children}
-        </ClientUIShell>
       </main>
+      {/* 챗봇*/}
+        <FloatingChatButton />
+        <ChatDrawer />
+      <Footer />
     </>
   );
 }

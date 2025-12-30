@@ -1,80 +1,58 @@
 "use client";
 
-import { useSelector } from "react-redux";
-import { RootState } from "@/store";
 import Link from "next/link";
 import { useAuthActions } from "@/hooks/useAuthActions";
-import DarkModeToggle from "./DarkModeToggle";
-import {useAuthState} from "@/hooks/useAuthState";
-
-
+import { useAuthState } from "@/hooks/useAuthState";
 
 export default function HeaderClient() {
-  const { isAuthenticated, user, loading } = useAuthState();
-  const { logout } = useAuthActions();
+    const { isAuthenticated, user, initialized } = useAuthState();
+    const { logout } = useAuthActions();
 
-  // 아직 auth.sync()가 끝나지 않았다면
-  // 헤더를 렌더하지 않는다.
-  if (loading) return null;
+    if (!initialized) {
+        return (
+            <div className="flex items-center gap-3">
+                <div className="h-9 w-20 bg-surface-light dark:bg-surface-dark rounded-lg animate-pulse" />
+                <div className="h-9 w-20 bg-surface-light dark:bg-surface-dark rounded-lg animate-pulse" />
+            </div>
+        );
+    }
 
-  return (
-    <div className="flex items-center gap-4">
-      {isAuthenticated ? (
-        <>
-          {user?.name && (
-            <span
-              className="
-                text-sm font-medium
-                text-text-primary-light
-                dark:text-text-primary-dark
-              "
-            >
-              {user.name}님 안녕하세요
-            </span>
-          )}
-          <button
-            onClick={logout}
-            className="
-              text-sm
-              text-text-muted-light
-              hover:text-text-primary-light
-              dark:text-text-muted-dark
-              dark:hover:text-text-primary-dark
-            "
-          >
-            로그아웃
-          </button>
-        </>
-      ) : (
-        <>
-          <Link
-            href="/login"
-            className="
-              text-sm
-              text-text-muted-light
-              hover:text-text-primary-light
-              dark:text-text-muted-dark
-              dark:hover:text-text-primary-dark
-            "
-          >
-            로그인
-          </Link>
+    return (
+        <div className="flex items-center gap-3">
+            {isAuthenticated ? (
+                <>
+                    {user?.name && (
+                        <div className="px-3 py-1.5 rounded-lg bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark">
+                            <span className="text-sm font-medium text-text-primary-light dark:text-text-primary-dark">
+                                {user.name}
+                            </span>
+                        </div>
+                    )}
 
-          <Link
-            href="/signup"
-            className="
-              px-4 h-9 flex items-center rounded-md text-sm font-medium
-              bg-accent hover:bg-accent-hover
-              text-white
-            "
-          >
-            회원가입
-          </Link>
-        </>
-      )}
+                    <button
+                        onClick={logout}
+                        className="px-4 py-2 rounded-lg text-sm font-medium text-text-muted-light dark:text-text-muted-dark hover:text-accent hover:bg-accent/5 transition-all"
+                    >
+                        로그아웃
+                    </button>
+                </>
+            ) : (
+                <>
+                    <Link
+                        href="/login"
+                        className="px-4 py-2 rounded-lg text-sm font-medium text-text-muted-light dark:text-text-muted-dark hover:text-accent hover:bg-accent/5 transition-all"
+                    >
+                        로그인
+                    </Link>
 
-      <DarkModeToggle />
-    </div>
-  );
+                    <Link
+                        href="/signup"
+                        className="px-5 py-2 rounded-lg text-sm font-semibold bg-accent hover:bg-accent-hover text-white shadow-lg shadow-accent/25 transition-all"
+                    >
+                        회원가입
+                    </Link>
+                </>
+            )}
+        </div>
+    );
 }
-
