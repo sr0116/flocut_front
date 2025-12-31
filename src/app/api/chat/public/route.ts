@@ -135,6 +135,18 @@ export async function POST(req: Request): Promise<Response> {
             .reverse()
             .find((m) => m.role === "user");
 
+        if (
+            lastUserMessage &&
+            typeof lastUserMessage.content === "string" &&
+            lastUserMessage.content.length > 300
+        ) {
+            return Response.json({
+                content:
+                    "이곳에서는 300자 이내의 짧은 텍스트만 체험할 수 있어요. 긴 문서는 워크스페이스에서 이용해 주세요.",
+            });
+        }
+
+
         const isSummaryRequest =
             !!lastUserMessage &&
             typeof lastUserMessage.content === "string" &&
