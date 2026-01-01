@@ -4,69 +4,43 @@ import {use, useState} from "react";
 import NotesFilterBar from "@/app/components/notes/NotesFilterBar";
 import NotesGridView from "@/app/components/notes/NotesGridView";
 import NotesListView from "@/app/components/notes/NotesListView";
+import {useParams} from "next/navigation";
+import {useNotesBySession} from "@/hooks/note/useNotesBySession";
+import Link from "next/link";
 
 export default function NotesPage({
                                     params,
                                   }: {
   params: Promise<{ id: string }>}) {
+  const {sessionId} = useParams<{sessionId:string}>();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState("recent");
 
-  const notes = [
-    {
-      id: "1",
-      title: "3월 마케팅 회의",
-      preview: "Q1 성과 리뷰 및 2분기 전략 수립에 대한 논의...",
-      date: "2시간 전",
-      type: "note",
-      starred: true,
-      tags: ["회의", "마케팅"],
-    },
-    {
-      id: "2",
-      title: "FloCut 기획 정리",
-      preview: "핵심 기능 명세 및 MVP 범위 정의...",
-      date: "어제",
-      type: "document",
-      starred: false,
-      tags: ["기획", "프로젝트"],
-    },
-    {
-      id: "3",
-      title: "개발 일정 정리",
-      preview: "스프린트 계획 및 마일스톤 설정...",
-      date: "3일 전",
-      type: "note",
-      starred: false,
-      tags: ["개발", "일정"],
-    },
-    {
-      id: "4",
-      title: "음성 회의록 - 2024.12.15",
-      preview: "음성 녹음을 기반으로 자동 생성된 회의록...",
-      date: "5일 전",
-      type: "audio",
-      starred: true,
-      tags: ["회의", "음성"],
-    },
-  ];
+  // 목록 조회
+  const {data, loading} = useNotesBySession(Number(sessionId));
+
+  // 결과
+  const notes = data?.notesBySession ?? [];
 
   return (
-    <div className="h-full flex flex-col bg-background-light dark:bg-background-dark">
-      {/* 상단 헤더 */}
-
-
-      {/* 필터 / 정렬 / 뷰 모드 */}
+    <div className="h-full flex flex-col">
+      {/* 정렬 / 뷰 모드 바 */}
       <NotesFilterBar
         sortBy={sortBy}
         viewMode={viewMode}
         onChangeSort={setSortBy}
         onChangeViewMode={setViewMode}
+        sessionId={Number(sessionId)}
       />
+
 
       {/* 노트 목록 */}
       <div className="flex-1 overflow-y-auto px-8 py-6">
-        {viewMode === "grid" ? (
+        {loading ? (
+          <div className="text-sm text-text-muted-light">
+            노트 불러오는 중...
+          </div>
+        ) : viewMode === "grid" ? (
           <NotesGridView notes={notes} />
         ) : (
           <NotesListView notes={notes} />
