@@ -4,13 +4,11 @@ import { useEffect, useState } from "react";
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import EditorToolbar from "./EditorToolbar";
-import EditorFormattingToolbar from "./EditorFormattingToolbar";
 import EditorFooter from "./EditorFooter";
 import TiptapEditor from "./TiptapEditor";
 import { Loader2 } from "lucide-react";
-import {createNote, updateNote} from "@/lib/rest/note/notes.api";
-import {useNoteDetail} from "@/hooks/note/useNoteDetail";
-
+import { createNote, updateNote } from "@/lib/rest/note/notes.api";
+import { useNoteDetail } from "@/hooks/notes/useNoteDetail";
 
 interface Props {
   noteId: string;
@@ -31,42 +29,37 @@ export default function EditorContainer({
                                           onToggleRightPanel,
                                           rightPanelOpen,
                                         }: Props) {
-  const [isEditing, setEditing] = useState(true);
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
   const [saving, setSaving] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
-  // 기존 노트 조회 (new면 스킵)
   const { note, loading } = useNoteDetail(
-    isNew ? undefined: Number(noteId)
+    isNew ? undefined : Number(noteId)
   );
 
-  // 기존 노트 로드
-  useEffect(() => {
-    if (!note || isNew) return;
-    setTitle(note.title);
-    setContent(note.content ?? "<p></p>");
-  }, [note, isNew]);
-
-  // 에디터 초기화
   const editor = useEditor({
-    content,
-    extensions: [StarterKit],
+    editable: true,
     immediatelyRender: false,
-    onUpdate({ editor }) {
-      setContent(editor.getHTML());
-    },
+    extensions: [StarterKit],
   });
 
+  // 최초 1회만 서버 데이터 반영
+  useEffect(() => {
+    if (!note || isNew || initialized || !editor) return;
 
-  // 저장 로직
+    setTitle(note.title);
+    editor.commands.setContent(note.content ?? "<p></p>");
+    setInitialized(true);
+  }, [note, isNew, initialized, editor]);
+
   const handleSave = async () => {
-    if (saving) return;
+    if (!editor || saving) return;
     setSaving(true);
 
     try {
+      const content = editor.getHTML();
+
       if (isNew) {
-        // 새 노트 생성
         const newNoteId = await createNote({
           sessionId,
           title: title || "제목 없음",
@@ -74,7 +67,6 @@ export default function EditorContainer({
         });
         onCreated(newNoteId);
       } else {
-        // 기존 노트 수정
         await updateNote({
           noteId: Number(noteId),
           title,
@@ -95,22 +87,20 @@ export default function EditorContainer({
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex-1 flex flex-col h-full overflow-hidden">
       <EditorToolbar
-        isEditing={isEditing}
-        onToggleEdit={() => setEditing(!isEditing)}
-        editorContent={content}
+        isEditing
+        editorContent=""
         onAIAction={onAIAction}
         onToggleRightPanel={onToggleRightPanel}
         rightPanelOpen={rightPanelOpen}
-        onSave={handleSave} // 저장 버튼 연결
+        onSave={handleSave}
         saving={saving}
       />
 
-      {isEditing && <EditorFormattingToolbar editor={editor} />}
-
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto py-8">
+        <div className="max-w-4xl mx-auto px-16 py-16">
+          {/* 제목 */}
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -118,15 +108,12 @@ export default function EditorContainer({
             className="w-full text-5xl font-bold bg-transparent outline-none mb-6"
           />
 
-          <TiptapEditor
-            content={content}
-            editable={isEditing}
-            onContentChange={setContent}
-          />
+          {/* 본문 */}
+          <TiptapEditor editor={editor} />
         </div>
       </div>
 
-      <EditorFooter content={content} />
+      <EditorFooter content={editor?.getText() ?? ""} />
     </div>
   );
 }

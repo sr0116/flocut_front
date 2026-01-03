@@ -8,7 +8,7 @@ import { useAuthActions } from "@/hooks/useAuthActions";
 
 import GlobalNav from "@/app/components/layout/WorkspaceLayout/GlobalNav";
 import WorkspaceHeader from "@/app/components/layout/WorkspaceLayout/WorkspaceHeader";
-import UploadHeader from "@/app/components/header/UploadHeader";
+import UploadHeader from "@/app/components/files/UploadHeader";
 
 export default function WorkspaceLayout({ children }: { children: React.ReactNode }) {
     const [collapsed, setCollapsed] = useState(false);

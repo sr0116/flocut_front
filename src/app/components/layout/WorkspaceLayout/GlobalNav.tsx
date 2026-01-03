@@ -22,7 +22,7 @@ import IconButton from "@/app/components/ui/icon-button/IconButton";
 import useResponsiveNav from "@/hooks/useResponsiveNav";
 import { useSessions } from "@/hooks/sessions/useSessions";
 import CreateSessionModal from "./CreateSessionModal";
-import SessionNavItem from "./SessionNavItem";
+import SessionNavItem from "@/app/components/sessions/SessionNavItem";
 
 export default function GlobalNav() {
     const pathname = usePathname();

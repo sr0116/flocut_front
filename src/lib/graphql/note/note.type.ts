@@ -30,19 +30,15 @@ export interface NoteItem {
 // 노트 상세 조회
 // 실제 편집 화면에서 사용하는 타입
 export interface NoteDetail {
-    noteId: number;          // 노트 PK
-    sessionId: number;       // 소속 세션
-    memberId: number;        // 작성자
-    title: string;           // 제목
-    content: string;         // 본문 내용
-
-    sourceType?: NoteSourceType | null; // 생성 출처
-    sourceId?: number | null;           // 참조 AI 결과 ID
-
-    status: NoteStatus;      // 상태
-    createdDate: string;     // 생성일
-    modifiedDate: string;    // 마지막 수정일
+  noteId: number;
+  title: string;
+  content: string;
+  sourceType?: NoteSourceType | null;
+  sourceId?: number | null;
+  createdDate: string;
+  modifiedDate: string;
 }
+
 
 
 // 노트 생성 입력값
@@ -58,11 +54,14 @@ export interface NoteCreateInput {
 
 // 노트 수정 입력값
 // 사용자가 직접 편집 후 저장할 때 사용
-export interface NoteUpdateInput {
-    noteId: number;          // 수정 대상 노트
-    title?: string;          // 제목 수정
-    content?: string;        // 본문 수정
-    status?: NoteStatus;     // 상태 변경
+export interface NoteUpdatePayload {
+  title?: string;
+  content?: string;
+  status?: NoteStatus;
+}
+
+export interface NoteUpdateInput extends NoteUpdatePayload {
+  noteId: number;
 }
 
 // 아직 DB에 저장되지 않은 임시 노트
@@ -89,12 +88,24 @@ export interface NoteGQL {
   sourceId?: number | null;
 }
 
+export interface NoteDetailGQL {
+  noteId: number;
+  title: string | null;
+  content: string | null;
+  sourceType?: string | null;
+  sourceId?: number | null;
+  regdate?: string | null;
+  moddate?: string | null;
+}
+
+
 // notesBySession Query 전체 응답
 export interface NotesBySessionResponse {
   notesBySession: NoteGQL[];
 }
 
 export interface NoteDetailResponse {
-  noteDetail: NoteDetail;
+  note: NoteDetail;
 }
+
 

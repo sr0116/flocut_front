@@ -12,8 +12,8 @@ import {
 } from "lucide-react";
 
 import IconButton from "@/app/components/ui/icon-button/IconButton";
-import VoiceRecorder from "@/app/components/layout/ai/VoiceRecorder";
-import DocumentCompare from "@/app/components/layout/ai/DocumentCompare";
+import VoiceRecorder from "@/app/components/ai/VoiceRecorder";
+import DocumentCompare from "@/app/components/ai/DocumentCompare";
 
 interface Props {
   isEditing: boolean;

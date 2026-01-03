@@ -5,8 +5,7 @@ import NotesFilterBar from "@/app/components/notes/NotesFilterBar";
 import NotesGridView from "@/app/components/notes/NotesGridView";
 import NotesListView from "@/app/components/notes/NotesListView";
 import {useParams} from "next/navigation";
-import {useNotesBySession} from "@/hooks/note/useNotesBySession";
-import Link from "next/link";
+import {useNotesBySession} from "@/hooks/notes/useNotesBySession";
 
 export default function NotesPage({
                                     params,
@@ -46,25 +45,6 @@ export default function NotesPage({
           <NotesListView notes={notes} />
         )}
       </div>
-
-      {/*<div className="flex h-full overflow-hidden">*/}
-      {/*  /!* 에디터 영역 *!/*/}
-      {/*  <EditorContainer*/}
-      {/*    noteId={id}*/}
-      {/*    onOpenContextPanel={handleOpenContextPanel}*/}
-      {/*    contextPanelOpen={contextPanelOpen}*/}
-      {/*  />*/}
-
-      {/*  /!* 컨텍스트 패널 (우측) *!/*/}
-      {/*  {contextPanelOpen && (*/}
-      {/*    <ContextPanel*/}
-      {/*      mode={contextPanelMode}*/}
-      {/*      noteId={id}*/}
-      {/*      onClose={() => setContextPanelOpen(false)}*/}
-      {/*      onChangeMode={setContextPanelMode}*/}
-      {/*    />*/}
-      {/*  )}*/}
-      {/*</div>*/}
 
     </div>
   );

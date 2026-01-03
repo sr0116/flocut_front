@@ -4,21 +4,25 @@ import { useRef, useState } from "react";
 import Button from "@/app/components/ui/button/Button";
 import { Upload } from "lucide-react";
 import { uploadFile } from "@/lib/rest/file/file.rest";
+import { requestDocumentSummary } from "@/lib/rest/summary/summary.rest";
 import { toast } from "sonner";
 
 type FileUploadButtonProps = {
+  sessionId: number;
+  requestSummary?: boolean;
   onSuccess?: () => void;
 };
 
 export default function FileUploadButton({
+                                           sessionId,
+                                           requestSummary = false,
                                            onSuccess,
                                          }: FileUploadButtonProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [loading, setLoading] = useState(false);
 
   const openPicker = () => {
-    if (loading) return;
-    inputRef.current?.click();
+    if (!loading) inputRef.current?.click();
   };
 
   const handleChange = async (
@@ -30,14 +34,24 @@ export default function FileUploadButton({
     setLoading(true);
 
     try {
-      await uploadFile(file);
+      //  파일 업로드
+      const uploaded = await uploadFile(file);
       toast.success("문서 업로드 완료");
 
-      // GraphQL 재조회용
+      // 체크된 경우만 요약 요청
+      if (requestSummary) {
+        await requestDocumentSummary({
+          fileId: uploaded.fileId, //  업로드 응답 기준
+          sessionId,
+          roundNo: 1,
+        });
+        toast.success("AI 요약 요청이 접수되었습니다.");
+      }
+
       onSuccess?.();
     } catch (err) {
       console.error(err);
-      toast.error("문서 업로드 실패");
+      toast.error("업로드 또는 요약 요청 실패");
     } finally {
       setLoading(false);
       e.target.value = "";
