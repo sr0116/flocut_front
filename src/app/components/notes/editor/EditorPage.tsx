@@ -5,7 +5,7 @@ import { useState } from "react";
 import EditorContainer from "@/app/components/notes/editor/EditorContainer";
 import ContextPanel from "@/app/components/layout/WorkspaceLayout/ContextPanel";
 import { requestDocumentSummary } from "@/lib/rest/summary/summary.rest";
-import {toast} from "sonner";
+import { toast } from "sonner";
 
 type ContextPanelMode =
   | "properties"
@@ -43,18 +43,6 @@ export default function EditorPage() {
     if (mode === "summary") {
       const fileId = Number(noteId);
       if (Number.isNaN(fileId)) return;
-
-      // try {
-        // await requestDocumentSummary({
-        //   fileId,
-        //   sessionId: Number(sessionId),
-        //   roundNo: 1,
-      //   });
-      // } catch (err) {
-      //   toast.error("서버 미연결 요청은 감")
-      //   console.error("요약 요청 실패 (AI 서버 미연결)", err);
-      //
-      // }
     }
   };
 
@@ -63,7 +51,7 @@ export default function EditorPage() {
   };
 
   return (
-    <div className="h-full flex overflow-hidden">
+    <div className="h-full flex overflow-hidden bg-white dark:bg-slate-950">
       <EditorContainer
         noteId={noteId}
         sessionId={Number(sessionId)}

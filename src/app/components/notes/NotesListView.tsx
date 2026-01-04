@@ -1,35 +1,49 @@
 "use client";
 
-import { useRouter, useParams } from "next/navigation";
-import { Mic, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 
-// 노트 리스트 뷰
-export default function NotesListView({ notes }: { notes: any[] }) {
-  const router = useRouter();
-  const { sessionId } = useParams<{ sessionId: string }>();
+interface Note {
+  noteId: number;
+  title?: string | null;
+  content?: string | null;
+  regdate?: string | null;
+  moddate?: string | null;
+  sourceType?: string | null;
+}
 
-  const iconFor = (sourceType?: string) => {
-    if (sourceType === "AUDIO") return <Mic size={16} />;
-    return <FileText size={16} />;
-  };
+interface Props {
+  notes: Note[];
+  onNoteClick?: (noteId: number) => void;
+}
 
+export default function NotesListView({ notes, onNoteClick }: Props) {
   return (
-    <div className="divide-y">
+    <div className="space-y-2">
       {notes.map((note) => (
         <div
           key={note.noteId}
-          onClick={() =>
-            router.push(`/workspace/${sessionId}/notes/${note.noteId}`)
-          }
-          className="flex items-center gap-4 p-4 cursor-pointer hover:bg-accent-soft"
+          onClick={() => onNoteClick?.(note.noteId)}
+          className="group flex items-center gap-4 px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-pink-300 dark:hover:border-pink-800 hover:bg-pink-50 dark:hover:bg-pink-900/10 transition-all cursor-pointer bg-white dark:bg-slate-900"
         >
-          {iconFor(note.sourceType)}
+          <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 group-hover:bg-pink-100 dark:group-hover:bg-pink-900/20 transition-colors">
+            <FileText size={20} className="text-green-500" />
+          </div>
 
-          <div className="flex-1">
-            <div className="font-medium">{note.title}</div>
-            <div className="text-xs text-text-muted-light">
-              {note.moddate ?? note.regdate}
-            </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-medium text-sm text-slate-800 dark:text-slate-200 truncate mb-1">
+              {note.title || "제목 없음"}
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {note.moddate
+                ? new Date(note.moddate).toLocaleDateString("ko-KR", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+                : "방금 전"}
+            </p>
           </div>
         </div>
       ))}

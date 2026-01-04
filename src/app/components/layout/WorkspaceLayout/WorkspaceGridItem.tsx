@@ -1,11 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { FileText, Mic, File, Sparkles, MessageSquare, GitCompare } from "lucide-react";
+import { FileText, Mic, File, Calendar } from "lucide-react";
 import Checkbox from "@/app/components/ui/form/Checkbox";
-import { requestDocumentSummary } from "@/lib/rest/summary/summary.rest";
-import { toast } from "sonner";
 
 type WorkspaceItem = {
   id: string;
@@ -22,17 +18,16 @@ type Props = {
   sessionId: number;
   selected: boolean;
   onToggleSelect: () => void;
+  onClick: () => void;
 };
 
 export default function WorkspaceGridItem({
                                             item,
                                             sessionId,
                                             selected,
-                                            onToggleSelect
+                                            onToggleSelect,
+                                            onClick,
                                           }: Props) {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
-
   const getIcon = () => {
     switch (item.type) {
       case "audio":
@@ -52,42 +47,9 @@ export default function WorkspaceGridItem({
     }
   };
 
-  const handleClick = (e: React.MouseEvent) => {
-    if (
-      (e.target as HTMLElement).closest('[data-no-navigate]') ||
-      (e.target as HTMLElement).closest('input[type="checkbox"]')
-    ) {
-      return;
-    }
-
-    if (item.noteId) {
-      router.push(`/workspace/${sessionId}/notes/${item.noteId}`);
-    } else if (item.fileId) {
-      router.push(`/workspace/${sessionId}/documents/${item.fileId}`);
-    }
-  };
-
-  const handleSummary = async () => {
-    if (!item.fileId && !item.noteId) return;
-
-    setLoading(true);
-    try {
-      await requestDocumentSummary({
-        fileId: item.fileId ?? item.noteId ?? 0,
-        sessionId,
-        roundNo: 1,
-      });
-      toast.success("요약 요청이 접수되었습니다");
-    } catch (err) {
-      toast.error("요약 요청 실패");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div
-      onClick={handleClick}
+      onClick={onClick}
       className={`
         group relative
         rounded-xl p-5
@@ -101,7 +63,6 @@ export default function WorkspaceGridItem({
       }
       `}
     >
-      {/* 체크박스 (왼쪽 상단) */}
       <div
         className="absolute top-3 left-3 z-10"
         onClick={(e) => e.stopPropagation()}
@@ -113,61 +74,30 @@ export default function WorkspaceGridItem({
         />
       </div>
 
-      {/* 타입 레이블 (오른쪽 상단) */}
       <div className="absolute top-3 right-3">
         <span className="px-2 py-1 rounded text-xs bg-surface-light dark:bg-surface-dark">
           {getTypeLabel()}
         </span>
       </div>
 
-      {/* 아이콘 */}
       <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 mt-6">
         {getIcon()}
       </div>
 
-      {/* 제목 */}
       <h3 className="font-medium text-center mb-2 line-clamp-2 min-h-[3rem]">
         {item.title}
       </h3>
 
-      {/* 날짜 */}
-      <p className="text-xs text-text-muted-light text-center mb-4">
-        {new Date(item.date).toLocaleDateString("ko-KR", {
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit"
-        })}
-      </p>
-
-      {/* 액션 버튼들 */}
-      <div
-        data-no-navigate
-        className="flex items-center justify-center gap-2 pt-3 border-t border-border-light dark:border-border-dark opacity-0 group-hover:opacity-100 transition-opacity"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          onClick={handleSummary}
-          disabled={loading}
-          className="p-2 rounded-md hover:bg-accent-soft transition-colors"
-          title="AI 요약"
-        >
-          <Sparkles size={16} className="text-accent" />
-        </button>
-
-        <button
-          className="p-2 rounded-md hover:bg-accent-soft transition-colors"
-          title="AI 피드백"
-        >
-          <MessageSquare size={16} className="text-accent" />
-        </button>
-
-        <button
-          className="p-2 rounded-md hover:bg-accent-soft transition-colors"
-          title="문서 비교"
-        >
-          <GitCompare size={16} className="text-purple-500" />
-        </button>
+      <div className="flex items-center justify-center gap-2 text-xs text-text-muted-light">
+        <Calendar size={12} />
+        <span>
+          {new Date(item.date).toLocaleDateString("ko-KR", {
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+          })}
+        </span>
       </div>
     </div>
   );

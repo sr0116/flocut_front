@@ -1,21 +1,18 @@
 "use client";
 
-import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Folder, Plus, Clock, FileText, Loader2 } from "lucide-react";
-
-import { useSessions } from "@/hooks/sessions/useSessions";
 import UnifiedWorkspacePage from "@/app/components/layout/WorkspaceLayout/UnifiedWorkspacePage";
+import Link from "next/link";
+import { Folder, Plus, Clock, FileText, Loader2 } from "lucide-react";
+import { useSessions } from "@/hooks/sessions/useSessions";
 
 export default function WorkspacePage() {
   const params = useParams<{ sessionId?: string }>();
   const sessionId = params?.sessionId;
 
-
   if (sessionId) {
     return <UnifiedWorkspacePage />;
   }
-
 
   const { sessions, loading } = useSessions();
 
@@ -30,7 +27,6 @@ export default function WorkspacePage() {
   return (
     <div className="h-full overflow-y-auto">
       <div className="max-w-5xl mx-auto px-8 py-12">
-        {/* 헤더 */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">워크스페이스</h1>
           <p className="text-text-muted-light">
@@ -38,7 +34,6 @@ export default function WorkspacePage() {
           </p>
         </div>
 
-        {/* 빠른 액션 */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
           <Link
             href="/workspace/new"
@@ -80,7 +75,6 @@ export default function WorkspacePage() {
           </Link>
         </div>
 
-        {/* 세션 목록 */}
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold">내 세션</h2>
