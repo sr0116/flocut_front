@@ -2,7 +2,7 @@
 "use client";
 
 import { X } from "lucide-react";
-import AISummaryContent from "./AISummaryContent";
+import AISummaryContent from "../AISummaryContent";
 
 export type ContextPanelMode =
   | "properties"

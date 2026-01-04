@@ -20,7 +20,7 @@ import FileUploadButton from "@/app/components/files/FileUploadButton";
 
 import WorkspaceGridItem from "@/app/components/layout/WorkspaceLayout/WorkspaceGridItem";
 import WorkspaceListItem from "@/app/components/layout/WorkspaceLayout/WorkspaceListItem";
-import RightPanel from "@/app/components/layout/WorkspaceLayout/RightPanel";
+import RightPanel from "@/app/components/layout/WorkspaceLayout/panel/RightPanel";
 
 type ContentType = "all" | "notes" | "documents" | "audio";
 type ViewMode = "grid" | "list";

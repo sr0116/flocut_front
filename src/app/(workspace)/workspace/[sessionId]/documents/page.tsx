@@ -3,7 +3,7 @@
 import { useRouter, useParams } from "next/navigation";
 import { useMyFiles } from "@/hooks/files/useMyFiles";
 import FileUploadButton from "@/app/components/files/FileUploadButton";
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import Checkbox from "@/app/components/ui/form/Checkbox";
 import DocumentListItem from "@/app/components/documents/DocumentListItem";
 import { FileText, Loader2 } from "lucide-react";
@@ -12,8 +12,10 @@ export default function DocumentsPage() {
   const router = useRouter();
   const { sessionId } = useParams<{ sessionId: string }>();
   const { files, loading, refetch } = useMyFiles();
+
   const [requestSummary, setRequestSummary] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+
   const itemsPerPage = 20;
 
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -99,7 +101,9 @@ export default function DocumentsPage() {
             {totalPages > 1 && (
               <div className="flex items-center justify-center gap-2 pb-6">
                 <button
-                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(1, prev - 1))
+                  }
                   disabled={currentPage === 1}
                   className="px-3 py-1.5 rounded border text-sm disabled:opacity-50 hover:bg-slate-100 dark:hover:bg-slate-800"
                 >
@@ -111,10 +115,11 @@ export default function DocumentsPage() {
                     (page) =>
                       page === 1 ||
                       page === totalPages ||
-                      (page >= currentPage - 2 && page <= currentPage + 2)
+                      (page >= currentPage - 2 &&
+                        page <= currentPage + 2)
                   )
                   .map((page, idx, arr) => (
-                    <React.Fragment key={page}>
+                    <Fragment key={page}>
                       {idx > 0 && arr[idx - 1] !== page - 1 && (
                         <span className="px-2">...</span>
                       )}
@@ -128,11 +133,15 @@ export default function DocumentsPage() {
                       >
                         {page}
                       </button>
-                    </React.Fragment>
+                    </Fragment>
                   ))}
 
                 <button
-                  onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                  onClick={() =>
+                    setCurrentPage((prev) =>
+                      Math.min(totalPages, prev + 1)
+                    )
+                  }
                   disabled={currentPage === totalPages}
                   className="px-3 py-1.5 rounded border text-sm disabled:opacity-50 hover:bg-slate-100 dark:hover:bg-slate-800"
                 >

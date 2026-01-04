@@ -61,7 +61,7 @@ export default function GlobalNav({
                 `}>
           {!collapsed && (
             <span className="font-bold text-lg bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent">
-                            FloCut
+                            FLOCUT
                         </span>
           )}
           <button
@@ -167,7 +167,6 @@ export default function GlobalNav({
   );
 }
 
-// Session Item with Expand/Collapse
 function SessionItem({
                        session,
                        isExpanded,
@@ -193,17 +192,24 @@ function SessionItem({
     <div>
       {/* Session Row */}
       <div className="group relative">
-        <button
+        <div
+          role="button"
+          tabIndex={0}
           onClick={onSelect}
           className={`
-                        w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-all
-                        ${isSelected
-            ? "bg-pink-100 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400 font-medium"
-            : "text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800"
+            w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm cursor-pointer
+            transition-all
+            ${
+            isSelected
+              ? "bg-pink-100 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400 font-medium"
+              : "text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800"
           }
-                    `}
+          `}
         >
-          <button
+          {/* Expand Toggle (NOT a button) */}
+          <div
+            role="button"
+            tabIndex={0}
             onClick={(e) => {
               e.stopPropagation();
               onToggleExpand();
@@ -212,12 +218,17 @@ function SessionItem({
           >
             <ChevronDown
               size={14}
-              className={`transition-transform ${isExpanded ? "" : "-rotate-90"}`}
+              className={`transition-transform ${
+                isExpanded ? "" : "-rotate-90"
+              }`}
             />
-          </button>
+          </div>
+
           <Folder size={14} />
-          <span className="flex-1 truncate text-left">{session.sessionTitle}</span>
-        </button>
+          <span className="flex-1 truncate text-left">
+            {session.sessionTitle}
+          </span>
+        </div>
 
         {/* Actions Menu */}
         <button
@@ -225,19 +236,25 @@ function SessionItem({
             e.stopPropagation();
             setShowMenu(!showMenu);
           }}
-          className="absolute right-2 top-1/2 -translate-y-1/2 p-1 opacity-0 group-hover:opacity-100 hover:bg-slate-300 dark:hover:bg-slate-700 rounded transition-all"
+          className="absolute right-2 top-1/2 -translate-y-1/2 p-1
+                     opacity-0 group-hover:opacity-100
+                     hover:bg-slate-300 dark:hover:bg-slate-700
+                     rounded transition-all"
         >
           <MoreHorizontal size={12} />
         </button>
 
         {showMenu && (
-          <div className="absolute right-0 top-8 w-32 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg z-50 overflow-hidden">
+          <div className="absolute right-0 top-8 w-32 rounded-lg border
+                          border-slate-200 dark:border-slate-800
+                          bg-white dark:bg-slate-900 shadow-lg z-50 overflow-hidden">
             <button
               onClick={() => {
                 setShowMenu(false);
                 setOpenEdit(true);
               }}
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left
+                         hover:bg-slate-100 dark:hover:bg-slate-800"
             >
               <Edit3 size={12} />
               수정
@@ -247,7 +264,8 @@ function SessionItem({
                 setShowMenu(false);
                 setOpenDelete(true);
               }}
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left
+                         text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
             >
               <Trash2 size={12} />
               삭제
@@ -259,18 +277,21 @@ function SessionItem({
       {/* Expanded Sub-items */}
       {isExpanded && (
         <div className="ml-6 mt-1 space-y-0.5">
-          <button className="w-full flex items-center gap-2 px-3 py-1 rounded-lg text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800">
+          <button className="w-full flex items-center gap-2 px-3 py-1 rounded-lg
+                             text-xs text-slate-600 dark:text-slate-400
+                             hover:bg-slate-200 dark:hover:bg-slate-800">
             <FileText size={12} />
             노트
           </button>
-          <button className="w-full flex items-center gap-2 px-3 py-1 rounded-lg text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800">
+          <button className="w-full flex items-center gap-2 px-3 py-1 rounded-lg
+                             text-xs text-slate-600 dark:text-slate-400
+                             hover:bg-slate-200 dark:hover:bg-slate-800">
             <FileText size={12} />
             문서
           </button>
         </div>
       )}
 
-      {/* Modals */}
       <SessionEditModal
         open={openEdit}
         onClose={() => setOpenEdit(false)}

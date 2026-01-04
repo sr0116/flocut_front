@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import NotesFilterBar from "@/app/components/notes/NotesFilterBar";
 import NotesGridView from "@/app/components/notes/NotesGridView";
 import NotesListView from "@/app/components/notes/NotesListView";
@@ -12,15 +12,17 @@ import Link from "next/link";
 export default function NotesPage() {
   const router = useRouter();
   const { sessionId } = useParams<{ sessionId: string }>();
+
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState("recent");
   const [currentPage, setCurrentPage] = useState(1);
+
   const itemsPerPage = 20;
 
   const { data, loading } = useNotesBySession(Number(sessionId));
   const notes = data?.notesBySession ?? [];
 
-  // 페이지네이션 적용
+  // 페이지네이션
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedNotes = notes.slice(startIndex, endIndex);
@@ -67,16 +69,24 @@ export default function NotesPage() {
           <>
             <div className="p-4 sm:p-6">
               {viewMode === "grid" ? (
-                <NotesGridView notes={paginatedNotes} onNoteClick={handleNoteClick} />
+                <NotesGridView
+                  notes={paginatedNotes}
+                  onNoteClick={handleNoteClick}
+                />
               ) : (
-                <NotesListView notes={paginatedNotes} onNoteClick={handleNoteClick} />
+                <NotesListView
+                  notes={paginatedNotes}
+                  onNoteClick={handleNoteClick}
+                />
               )}
             </div>
 
             {totalPages > 1 && (
               <div className="flex items-center justify-center gap-2 pb-6">
                 <button
-                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(1, prev - 1))
+                  }
                   disabled={currentPage === 1}
                   className="px-3 py-1.5 rounded border text-sm disabled:opacity-50 hover:bg-slate-100 dark:hover:bg-slate-800"
                 >
@@ -88,10 +98,11 @@ export default function NotesPage() {
                     (page) =>
                       page === 1 ||
                       page === totalPages ||
-                      (page >= currentPage - 2 && page <= currentPage + 2)
+                      (page >= currentPage - 2 &&
+                        page <= currentPage + 2)
                   )
                   .map((page, idx, arr) => (
-                    <React.Fragment key={page}>
+                    <Fragment key={page}>
                       {idx > 0 && arr[idx - 1] !== page - 1 && (
                         <span className="px-2">...</span>
                       )}
@@ -105,11 +116,15 @@ export default function NotesPage() {
                       >
                         {page}
                       </button>
-                    </React.Fragment>
+                    </Fragment>
                   ))}
 
                 <button
-                  onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                  onClick={() =>
+                    setCurrentPage((prev) =>
+                      Math.min(totalPages, prev + 1)
+                    )
+                  }
                   disabled={currentPage === totalPages}
                   className="px-3 py-1.5 rounded border text-sm disabled:opacity-50 hover:bg-slate-100 dark:hover:bg-slate-800"
                 >

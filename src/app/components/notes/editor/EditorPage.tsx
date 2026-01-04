@@ -2,67 +2,40 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import EditorContainer from "@/app/components/notes/editor/EditorContainer";
-import ContextPanel from "@/app/components/layout/WorkspaceLayout/ContextPanel";
-import { requestDocumentSummary } from "@/lib/rest/summary/summary.rest";
-import { toast } from "sonner";
+import EditorContainer from "./EditorContainer";
+import ContextPanel from "@/app/components/layout/WorkspaceLayout/panel/ContextPanel";
 
-type ContextPanelMode =
+type PanelMode =
   | "properties"
   | "ai-summary"
   | "ai-feedback"
-  | "ai-compare"
-  | "versions"
-  | "comments"
-  | "calendar";
+  | "ai-compare";
 
 export default function EditorPage() {
   const router = useRouter();
-
   const { sessionId, id: noteId } = useParams<{
     sessionId: string;
     id: string;
   }>();
 
   const isNew = noteId === "new";
-
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
-  const [panelMode, setPanelMode] =
-    useState<ContextPanelMode>("properties");
-
-  const handleToggleRightPanel = () => {
-    setRightPanelOpen((prev) => !prev);
-  };
-
-  const handleAIAction = async (
-    mode: "summary" | "feedback" | "compare"
-  ) => {
-    setPanelMode(`ai-${mode}` as ContextPanelMode);
-    setRightPanelOpen(true);
-
-    if (mode === "summary") {
-      const fileId = Number(noteId);
-      if (Number.isNaN(fileId)) return;
-    }
-  };
-
-  const handleClosePanel = () => {
-    setRightPanelOpen(false);
-  };
+  const [panelMode, setPanelMode] = useState<PanelMode>("properties");
 
   return (
-    <div className="h-full flex overflow-hidden bg-white dark:bg-slate-950">
+    <div className="h-full flex overflow-hidden">
       <EditorContainer
         noteId={noteId}
         sessionId={Number(sessionId)}
         isNew={isNew}
-        onCreated={(createdNoteId) => {
-          router.replace(
-            `/workspace/${sessionId}/notes/${createdNoteId}`
-          );
+        onCreated={(id) => {
+          router.replace(`/workspace/${sessionId}/notes/${id}`);
         }}
-        onToggleRightPanel={handleToggleRightPanel}
-        onAIAction={handleAIAction}
+        onAIAction={(mode) => {
+          setPanelMode(`ai-${mode}` as PanelMode);
+          setRightPanelOpen(true);
+        }}
+        onToggleRightPanel={() => setRightPanelOpen((v) => !v)}
         rightPanelOpen={rightPanelOpen}
       />
 
@@ -70,7 +43,7 @@ export default function EditorPage() {
         <ContextPanel
           mode={panelMode}
           noteId={Number(noteId)}
-          onClose={handleClosePanel}
+          onClose={() => setRightPanelOpen(false)}
         />
       )}
     </div>

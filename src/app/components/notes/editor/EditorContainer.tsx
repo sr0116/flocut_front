@@ -10,11 +10,14 @@ import { TextStyle } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
 
 import EditorToolbar from "./EditorToolbar";
-import EditorFooter from "./EditorFooter";
+import EditorFormattingToolbar from "./toolbar/EditorFormattingToolbar";
 import TiptapEditor from "./TiptapEditor";
-import { Loader2 } from "lucide-react";
+import PanelFooter from "../../layout/WorkspaceLayout/panel/PanelFooter";
+
+
 import { createNote, updateNote } from "@/lib/rest/note/notes.api";
 import { useNoteDetail } from "@/hooks/notes/useNoteDetail";
+import LoadingSpinner from "@/app/components/layout/loading/LoadingSpinner";
 
 interface Props {
   noteId: string;
@@ -40,23 +43,21 @@ export default function EditorContainer({
   const [saved, setSaved] = useState(true);
   const [initialized, setInitialized] = useState(false);
 
-  const { note, loading } = useNoteDetail(isNew ? undefined : Number(noteId));
+  // 신규 노트가 아닐 때만 상세 조회
+  const { note, loading } = useNoteDetail(
+    isNew ? undefined : Number(noteId)
+  );
 
+  // Tiptap 에디터 인스턴스
   const editor = useEditor({
     editable: true,
     immediatelyRender: false,
     extensions: [
       StarterKit,
-
-      // 텍스트 스타일
       Underline,
       Highlight,
-
-      // 색상 관련 (setColor)
       TextStyle,
       Color,
-
-      // 정렬 (setTextAlign)
       TextAlign.configure({
         types: ["heading", "paragraph"],
       }),
@@ -66,15 +67,16 @@ export default function EditorContainer({
     },
   });
 
+  // 기존 노트 로딩 시 에디터 초기화
   useEffect(() => {
     if (!note || isNew || initialized || !editor) return;
 
-    setTitle(note.title);
+    setTitle(note.title ?? "");
     editor.commands.setContent(note.content ?? "<p></p>");
     setInitialized(true);
   }, [note, isNew, initialized, editor]);
 
-  // Auto-save after 2 seconds
+  // 자동 저장 (2초 디바운스)
   useEffect(() => {
     if (saved || !editor) return;
 
@@ -85,8 +87,10 @@ export default function EditorContainer({
     return () => clearTimeout(timer);
   }, [saved, editor, title]);
 
+  // 저장 처리
   const handleSave = async () => {
     if (!editor || saving) return;
+
     setSaving(true);
 
     try {
@@ -106,22 +110,25 @@ export default function EditorContainer({
           content,
         });
       }
+
       setSaved(true);
     } finally {
       setSaving(false);
     }
   };
 
+  // 기존 노트 로딩 상태
   if (!isNew && loading) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <Loader2 className="animate-spin text-pink-500" size={32} />
+        <LoadingSpinner size="md" />
       </div>
     );
   }
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden bg-white dark:bg-slate-950">
+      {/* 상단 액션 툴바 */}
       <EditorToolbar
         isEditing={true}
         saving={saving}
@@ -134,8 +141,12 @@ export default function EditorContainer({
         editorContent={editor?.getHTML() ?? ""}
       />
 
+      {/* 포맷팅 툴바 */}
+      <EditorFormattingToolbar editor={editor} />
+
+      {/* 에디터 본문 */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto px-8 md:px-16 py-12">
+        <div className="max-w-4xl mx-auto px-4 sm:px-8 md:px-16 py-10">
           <input
             value={title}
             onChange={(e) => {
@@ -143,24 +154,32 @@ export default function EditorContainer({
               setSaved(false);
             }}
             placeholder="제목 없음"
-            className="w-full text-4xl font-bold bg-transparent outline-none mb-2 text-slate-900 dark:text-slate-100 placeholder:text-slate-300 dark:placeholder:text-slate-700"
+            className="w-full text-3xl sm:text-4xl font-bold bg-transparent outline-none mb-4 text-slate-900 dark:text-slate-100 placeholder:text-slate-300 dark:placeholder:text-slate-700"
           />
 
-          <div className="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400 mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
-            <span>
-              {new Date().toLocaleDateString("ko-KR", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </span>
+          <div className="text-sm text-slate-500 dark:text-slate-400 mb-8 border-b pb-4">
+            {new Date().toLocaleDateString("ko-KR", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
           </div>
 
           <TiptapEditor editor={editor} />
         </div>
       </div>
 
-      <EditorFooter content={editor?.getText() ?? ""} />
+      {/* 패널/페이지 공용 Footer */}
+      <PanelFooter
+        saved={saved}
+        charCount={editor?.getText().length ?? 0}
+        wordCount={
+          editor
+            ? editor.getText().trim().split(/\s+/).filter(Boolean).length
+            : 0
+        }
+      />
+
     </div>
   );
 }
