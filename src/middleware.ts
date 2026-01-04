@@ -22,7 +22,7 @@ export const config = {
   matcher: [
     "/notes/:path*",
     "/documents/:path*",
-    "/workspace/:path*",
+    // "/workspace/:path*",
     "/mypage/:path*",
   ],
 };
