@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Filter, LayoutGrid, List, Plus, SlidersHorizontal } from "lucide-react";
+import { LayoutGrid, List, Plus, SlidersHorizontal } from "lucide-react";
 
 export default function NotesFilterBar({
                                          sortBy,
@@ -17,10 +17,10 @@ export default function NotesFilterBar({
   sessionId: number;
 }) {
   return (
-    <div className="h-14 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 bg-white dark:bg-slate-950">
-      {/* Left: Filter & Sort */}
+    <div className="h-14 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 sm:px-6 bg-white dark:bg-slate-950 flex-shrink-0">
+      {/* 좌측: 필터 & 정렬 */}
       <div className="flex items-center gap-2">
-        <button className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors">
+        <button className="flex items-center gap-2 px-2 sm:px-3 py-1.5 text-xs sm:text-sm rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors">
           <SlidersHorizontal size={16} />
           <span className="hidden sm:inline">필터</span>
         </button>
@@ -28,7 +28,7 @@ export default function NotesFilterBar({
         <select
           value={sortBy}
           onChange={(e) => onChangeSort(e.target.value)}
-          className="px-3 py-1.5 text-sm rounded-lg bg-transparent border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors cursor-pointer outline-none"
+          className="px-2 sm:px-3 py-1.5 text-xs sm:text-sm rounded-lg bg-transparent border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors cursor-pointer outline-none"
         >
           <option value="recent">최근 수정순</option>
           <option value="created">생성일순</option>
@@ -36,11 +36,11 @@ export default function NotesFilterBar({
         </select>
       </div>
 
-      {/* Right: New Note & View Mode */}
+      {/* 우측: 새 노트 & 뷰 모드 */}
       <div className="flex items-center gap-2">
         <Link
           href={`/workspace/${sessionId}/notes/new`}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg bg-gradient-to-r from-pink-500 to-violet-500 text-white hover:shadow-lg transition-all"
+          className="flex items-center gap-2 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg bg-gradient-to-r from-pink-500 to-violet-500 text-white hover:shadow-lg transition-all"
         >
           <Plus size={16} />
           <span className="hidden sm:inline">새 노트</span>

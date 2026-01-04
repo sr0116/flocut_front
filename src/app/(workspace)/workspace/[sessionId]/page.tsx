@@ -40,7 +40,10 @@ export default function SessionHomePage() {
   const [panelWidth, setPanelWidth] = useState(600);
   const isDraggingRef = useRef(false);
 
-  // URL에서 선택된 항목 파싱
+  // 페이지네이션 상태
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
+
   const selectedId = searchParams.get("id");
   const selectedType = searchParams.get("type") as "note" | "document" | "audio" | null;
 
@@ -49,7 +52,6 @@ export default function SessionHomePage() {
 
   const notes = notesData?.notesBySession ?? [];
 
-  // ESC 키로 패널 닫기
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape" && selectedId) {
@@ -60,7 +62,6 @@ export default function SessionHomePage() {
     return () => window.removeEventListener("keydown", handleEsc);
   }, [selectedId]);
 
-  // 패널 리사이즈
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDraggingRef.current) return;
@@ -138,14 +139,23 @@ export default function SessionHomePage() {
     });
   }, [notes, files, searchQuery, sortBy, contentType]);
 
+  // 페이지네이션 적용
+  const paginatedItems = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return unifiedItems.slice(startIndex, endIndex);
+  }, [unifiedItems, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(unifiedItems.length / itemsPerPage);
+
   const loading = notesLoading || filesLoading;
 
   const isAllSelected =
-    unifiedItems.length > 0 && selectedItems.size === unifiedItems.length;
+    paginatedItems.length > 0 && selectedItems.size === paginatedItems.length;
 
   const toggleSelectAll = () => {
     setSelectedItems(
-      isAllSelected ? new Set() : new Set(unifiedItems.map((i) => i.id))
+      isAllSelected ? new Set() : new Set(paginatedItems.map((i) => i.id))
     );
   };
 
@@ -188,40 +198,44 @@ export default function SessionHomePage() {
   };
 
   return (
-    <div className="h-full flex">
-      {/* 가운데 리스트 */}
+    <div className="h-full flex overflow-hidden">
       <div
-        className="flex-1 flex flex-col transition-all"
+        className="flex-1 flex flex-col overflow-hidden transition-all"
         style={{
           width: selectedId ? `calc(100% - ${panelWidth}px)` : "100%"
         }}
       >
-        <div className="border-b border-slate-200 dark:border-slate-800">
-          <div className="flex items-center justify-between px-8 py-4">
+        {/* 헤더 영역 */}
+        <div className="flex-shrink-0 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
+          <div className="flex items-center justify-between px-4 sm:px-8 py-4">
             <div>
-              <h1 className="text-2xl font-bold">세션 #{sessionId}</h1>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              <h1 className="text-xl sm:text-2xl font-bold">워크스페이스</h1>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
                 {unifiedItems.length}개 항목
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               {selectedItems.size > 0 && (
                 <>
-                  <Button variant="secondary" onClick={handleBulkSummary}>
-                    선택 요약 ({selectedItems.size})
+                  <Button variant="secondary" size="sm" onClick={handleBulkSummary}>
+                    <span className="hidden sm:inline">선택 요약 ({selectedItems.size})</span>
+                    <span className="sm:hidden">요약 ({selectedItems.size})</span>
                   </Button>
-                  <Button variant="secondary" onClick={handleBulkCompare}>
-                    선택 비교
+                  <Button variant="secondary" size="sm" onClick={handleBulkCompare}>
+                    <span className="hidden sm:inline">선택 비교</span>
+                    <span className="sm:hidden">비교</span>
                   </Button>
                 </>
               )}
 
-              <Checkbox
-                label="업로드 후 AI 요약"
-                checked={requestSummary}
-                onChange={setRequestSummary}
-              />
+              <div className="hidden md:block">
+                <Checkbox
+                  label="업로드 후 AI 요약"
+                  checked={requestSummary}
+                  onChange={setRequestSummary}
+                />
+              </div>
 
               <FileUploadButton
                 sessionId={Number(sessionId)}
@@ -232,18 +246,18 @@ export default function SessionHomePage() {
                 }}
               />
 
-              <Button variant="primary" onClick={handleNewNote}>
+              <Button variant="primary" size="sm" onClick={handleNewNote}>
                 <Plus size={16} />
-                새 노트
+                <span className="hidden sm:inline">새 노트</span>
               </Button>
             </div>
           </div>
 
-          <div className="flex items-center justify-between px-8 py-3 border-t border-slate-200 dark:border-slate-800">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between px-4 sm:px-8 py-3 border-t border-slate-200 dark:border-slate-800">
+            <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto">
               <Checkbox checked={isAllSelected} onChange={toggleSelectAll} />
 
-              <div className="flex gap-2 border rounded-lg px-2 py-1.5">
+              <div className="flex gap-1 sm:gap-2 border rounded-lg px-1 sm:px-2 py-1.5">
                 {(
                   [
                     ["all", "전체", null],
@@ -255,14 +269,14 @@ export default function SessionHomePage() {
                   <button
                     key={key}
                     onClick={() => setContentType(key)}
-                    className={`px-3 py-1 rounded text-sm flex items-center gap-1 transition-colors ${
+                    className={`px-2 sm:px-3 py-1 rounded text-xs sm:text-sm flex items-center gap-1 transition-colors whitespace-nowrap ${
                       contentType === key
                         ? "bg-pink-500 text-white"
                         : "hover:bg-slate-100 dark:hover:bg-slate-800"
                     }`}
                   >
                     {Icon && <Icon size={14} />}
-                    {label}
+                    <span className="hidden sm:inline">{label}</span>
                   </button>
                 ))}
               </div>
@@ -270,7 +284,7 @@ export default function SessionHomePage() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortBy)}
-                className="px-3 py-1.5 rounded border text-sm bg-white dark:bg-slate-900"
+                className="px-2 sm:px-3 py-1.5 rounded border text-xs sm:text-sm bg-white dark:bg-slate-900"
               >
                 <option value="recent">최근순</option>
                 <option value="created">생성순</option>
@@ -281,7 +295,7 @@ export default function SessionHomePage() {
                 placeholder="검색..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="px-3 py-1.5 rounded border text-sm w-64 bg-white dark:bg-slate-900"
+                className="px-2 sm:px-3 py-1.5 rounded border text-xs sm:text-sm w-32 sm:w-64 bg-white dark:bg-slate-900"
               />
             </div>
 
@@ -306,10 +320,11 @@ export default function SessionHomePage() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-8 py-6">
+        {/* 리스트 영역 */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-6">
           {loading ? (
             <div className="text-center text-slate-500">불러오는 중...</div>
-          ) : unifiedItems.length === 0 ? (
+          ) : paginatedItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full">
               <FileText size={64} className="text-slate-300 mb-4" />
               <p className="text-slate-500 mb-6">작업물이 없습니다</p>
@@ -320,7 +335,7 @@ export default function SessionHomePage() {
             </div>
           ) : viewMode === "list" ? (
             <div className="space-y-1">
-              {unifiedItems.map((item) => (
+              {paginatedItems.map((item) => (
                 <WorkspaceListItem
                   key={item.id}
                   item={item}
@@ -332,8 +347,8 @@ export default function SessionHomePage() {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {unifiedItems.map((item) => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {paginatedItems.map((item) => (
                 <WorkspaceGridItem
                   key={item.id}
                   item={item}
@@ -345,13 +360,57 @@ export default function SessionHomePage() {
               ))}
             </div>
           )}
+
+          {/* 페이지네이션 */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-8">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 rounded border text-sm disabled:opacity-50 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                이전
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(
+                  (page) =>
+                    page === 1 ||
+                    page === totalPages ||
+                    (page >= currentPage - 2 && page <= currentPage + 2)
+                )
+                .map((page, idx, arr) => (
+                  <React.Fragment key={page}>
+                    {idx > 0 && arr[idx - 1] !== page - 1 && (
+                      <span className="px-2">...</span>
+                    )}
+                    <button
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-1.5 rounded text-sm transition-colors ${
+                        currentPage === page
+                          ? "bg-pink-500 text-white"
+                          : "hover:bg-slate-100 dark:hover:bg-slate-800"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  </React.Fragment>
+                ))}
+
+              <button
+                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1.5 rounded border text-sm disabled:opacity-50 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                다음
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* 우측 패널 (통합) */}
       {selectedId && selectedType && (
         <>
-          {/* 리사이즈 핸들 */}
           <div
             onMouseDown={handleStartResize}
             className="w-1 bg-slate-200 dark:bg-slate-800 hover:bg-pink-500 cursor-ew-resize transition-colors flex-shrink-0"

@@ -18,18 +18,18 @@ interface Props {
 
 export default function NotesGridView({ notes, onNoteClick }: Props) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {notes.map((note) => (
         <div
           key={note.noteId}
           onClick={() => onNoteClick?.(note.noteId)}
-          className="group relative rounded-xl p-5 border-2 border-slate-200 dark:border-slate-800 hover:border-pink-300 dark:hover:border-pink-800 hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer bg-white dark:bg-slate-900"
+          className="group relative rounded-xl p-4 sm:p-5 border-2 border-slate-200 dark:border-slate-800 hover:border-pink-300 dark:hover:border-pink-800 hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer bg-white dark:bg-slate-900"
         >
-          <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4">
+          <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4">
             <FileText size={32} className="text-green-500" />
           </div>
 
-          <h3 className="font-medium text-center mb-2 line-clamp-2 min-h-[3rem]">
+          <h3 className="font-medium text-center mb-2 line-clamp-2 min-h-[3rem] text-sm sm:text-base text-slate-900 dark:text-slate-100">
             {note.title || "제목 없음"}
           </h3>
 

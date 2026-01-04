@@ -6,38 +6,46 @@ import FileUploadButton from "@/app/components/files/FileUploadButton";
 import { useState } from "react";
 import Checkbox from "@/app/components/ui/form/Checkbox";
 import DocumentListItem from "@/app/components/documents/DocumentListItem";
-import { Upload, FileText, Loader2 } from "lucide-react";
+import { FileText, Loader2 } from "lucide-react";
 
 export default function DocumentsPage() {
   const router = useRouter();
   const { sessionId } = useParams<{ sessionId: string }>();
   const { files, loading, refetch } = useMyFiles();
   const [requestSummary, setRequestSummary] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedFiles = files.slice(startIndex, endIndex);
+  const totalPages = Math.ceil(files.length / itemsPerPage);
 
   const openDetail = (fileId: number) => {
-    // 워크스페이스 패널로 열기
     router.push(`/workspace/${sessionId}?type=document&id=${fileId}`);
   };
 
   return (
-    <div className="h-full flex flex-col bg-white dark:bg-slate-950">
+    <div className="h-full flex flex-col bg-white dark:bg-slate-950 overflow-hidden">
       {/* Header */}
-      <div className="h-14 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6">
+      <div className="h-14 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 sm:px-6 flex-shrink-0">
         <div className="flex items-center gap-4">
-          <h1 className="text-lg font-semibold text-slate-800 dark:text-slate-200">
+          <h1 className="text-base sm:text-lg font-semibold text-slate-800 dark:text-slate-200">
             문서
           </h1>
-          <span className="text-sm text-slate-500 dark:text-slate-400">
+          <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
             {files.length}개
           </span>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Checkbox
-            label="업로드 후 AI 요약"
-            checked={requestSummary}
-            onChange={setRequestSummary}
-          />
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="hidden sm:block">
+            <Checkbox
+              label="업로드 후 AI 요약"
+              checked={requestSummary}
+              onChange={setRequestSummary}
+            />
+          </div>
           <FileUploadButton
             sessionId={Number(sessionId)}
             requestSummary={requestSummary}
@@ -70,22 +78,69 @@ export default function DocumentsPage() {
             />
           </div>
         ) : (
-          <div className="p-6">
-            <div className="space-y-2">
-              {files.map((file) => (
-                <div
-                  key={file.fileId}
-                  onClick={() => openDetail(file.fileId)}
-                  className="cursor-pointer"
-                >
-                  <DocumentListItem
-                    file={file}
-                    sessionId={Number(sessionId)}
-                  />
-                </div>
-              ))}
+          <>
+            <div className="p-4 sm:p-6">
+              <div className="space-y-2">
+                {paginatedFiles.map((file) => (
+                  <div
+                    key={file.fileId}
+                    onClick={() => openDetail(file.fileId)}
+                    className="cursor-pointer"
+                  >
+                    <DocumentListItem
+                      file={file}
+                      sessionId={Number(sessionId)}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 pb-6">
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 rounded border text-sm disabled:opacity-50 hover:bg-slate-100 dark:hover:bg-slate-800"
+                >
+                  이전
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(
+                    (page) =>
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 2 && page <= currentPage + 2)
+                  )
+                  .map((page, idx, arr) => (
+                    <React.Fragment key={page}>
+                      {idx > 0 && arr[idx - 1] !== page - 1 && (
+                        <span className="px-2">...</span>
+                      )}
+                      <button
+                        onClick={() => setCurrentPage(page)}
+                        className={`px-3 py-1.5 rounded text-sm transition-colors ${
+                          currentPage === page
+                            ? "bg-pink-500 text-white"
+                            : "hover:bg-slate-100 dark:hover:bg-slate-800"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    </React.Fragment>
+                  ))}
+
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 rounded border text-sm disabled:opacity-50 hover:bg-slate-100 dark:hover:bg-slate-800"
+                >
+                  다음
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

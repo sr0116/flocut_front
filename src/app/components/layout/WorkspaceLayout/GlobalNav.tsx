@@ -2,16 +2,14 @@
 
 import { useState } from "react";
 import {
-  Home, Clock, Star, FileText,
+  Home, Clock, Star, FileText, Users, Archive,
   Folder, Plus, Settings, ChevronLeft, ChevronRight,
   ChevronDown, MoreHorizontal, Edit3, Trash2
 } from "lucide-react";
 import { useSessions } from "@/hooks/sessions/useSessions";
-
+import CreateSessionModal from "../../sessions/CreateSessionModal";
 import SessionEditModal from "@/app/components/sessions/SessionEditModal";
 import SessionDeleteModal from "@/app/components/sessions/SessionDeleteModal";
-import { useRouter } from "next/navigation";
-import CreateSessionModal from "@/app/components/sessions/CreateSessionModal";
 
 interface Props {
   collapsed: boolean;
@@ -26,14 +24,13 @@ export default function GlobalNav({
                                     selectedSessionId,
                                     onSessionSelect,
                                   }: Props) {
-  const router = useRouter();
   const [openCreate, setOpenCreate] = useState(false);
   const [expandedSessions, setExpandedSessions] = useState<Set<number>>(new Set());
 
   const { sessions, refetch } = useSessions();
 
   const globalNav = [
-    { href: "/workspace", label: "홈", icon: Home },
+    { href: "/", label: "홈", icon: Home },
     { href: "/recent", label: "최근 문서", icon: Clock },
     { href: "/favorites", label: "즐겨찾기", icon: Star },
     { href: "/notes", label: "모든 노트", icon: FileText },
@@ -51,20 +48,21 @@ export default function GlobalNav({
 
   return (
     <aside className={`
-      h-full flex-shrink-0 transition-all duration-300
-      bg-slate-50 dark:bg-slate-900
-      border-r border-slate-200 dark:border-slate-800
-      ${collapsed ? "w-16" : "w-64"}
-    `}>
-      <nav className="flex flex-col h-full">
-        <div className={`
-          h-14 flex items-center px-4 border-b border-slate-200 dark:border-slate-800
-          ${collapsed ? "justify-center" : "justify-between"}
+            h-full flex-shrink-0 transition-all duration-300
+            bg-slate-50 dark:bg-slate-900
+            border-r border-slate-200 dark:border-slate-800
+            ${collapsed ? "w-16" : "w-64"}
         `}>
+      <nav className="flex flex-col h-full">
+        {/* Header */}
+        <div className={`
+                    h-14 flex items-center px-4 border-b border-slate-200 dark:border-slate-800
+                    ${collapsed ? "justify-center" : "justify-between"}
+                `}>
           {!collapsed && (
             <span className="font-bold text-lg bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent">
-              FloCut
-            </span>
+                            FloCut
+                        </span>
           )}
           <button
             onClick={onToggle}
@@ -75,20 +73,20 @@ export default function GlobalNav({
         </div>
 
         <div className="flex-1 overflow-y-auto p-3">
+          {/* Quick Navigation */}
           <div className="space-y-1 mb-6">
             {globalNav.map((item) => {
               const Icon = item.icon;
               return (
                 <button
                   key={item.href}
-                  onClick={() => router.push(item.href)}
                   className={`
-                    w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
-                    transition-colors
-                    text-slate-700 dark:text-slate-300
-                    hover:bg-slate-100 dark:hover:bg-slate-800
-                    ${collapsed ? "justify-center" : ""}
-                  `}
+                                        w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
+                                        transition-colors
+                                        text-slate-700 dark:text-slate-300
+                                        hover:bg-slate-100 dark:hover:bg-slate-800
+                                        ${collapsed ? "justify-center" : ""}
+                                    `}
                 >
                   <Icon size={18} />
                   {!collapsed && <span>{item.label}</span>}
@@ -97,16 +95,17 @@ export default function GlobalNav({
             })}
           </div>
 
+          {/* Sessions */}
           <div>
             <div className={`
-              flex items-center justify-between px-2 mb-2
-              ${collapsed ? "justify-center" : ""}
-            `}>
+                            flex items-center justify-between px-2 mb-2
+                            ${collapsed ? "justify-center" : ""}
+                        `}>
               {!collapsed ? (
                 <>
-                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                    세션
-                  </span>
+                                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                        세션
+                                    </span>
                   <button
                     onClick={() => setOpenCreate(true)}
                     className="p-1 hover:bg-slate-200 dark:hover:bg-slate-800 rounded transition-colors"
@@ -133,10 +132,7 @@ export default function GlobalNav({
                     isExpanded={expandedSessions.has(session.sessionId)}
                     isSelected={selectedSessionId === session.sessionId}
                     onToggleExpand={() => toggleSessionExpand(session.sessionId)}
-                    onSelect={() => {
-                      onSessionSelect(session.sessionId);
-                      router.push(`/workspace/${session.sessionId}`);
-                    }}
+                    onSelect={() => onSessionSelect(session.sessionId)}
                     onUpdated={refetch}
                     onDeleted={refetch}
                   />
@@ -146,15 +142,16 @@ export default function GlobalNav({
           </div>
         </div>
 
+        {/* Footer */}
         <div className="p-3 border-t border-slate-200 dark:border-slate-800">
           <button
             className={`
-              w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
-              text-slate-700 dark:text-slate-300
-              hover:bg-slate-100 dark:hover:bg-slate-800
-              transition-colors
-              ${collapsed ? "justify-center" : ""}
-            `}
+                            w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
+                            text-slate-700 dark:text-slate-300
+                            hover:bg-slate-100 dark:hover:bg-slate-800
+                            transition-colors
+                            ${collapsed ? "justify-center" : ""}
+                        `}
           >
             <Settings size={18} />
             {!collapsed && <span>설정</span>}
@@ -170,6 +167,7 @@ export default function GlobalNav({
   );
 }
 
+// Session Item with Expand/Collapse
 function SessionItem({
                        session,
                        isExpanded,
@@ -193,16 +191,17 @@ function SessionItem({
 
   return (
     <div>
+      {/* Session Row */}
       <div className="group relative">
         <button
           onClick={onSelect}
           className={`
-            w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-all
-            ${isSelected
+                        w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-all
+                        ${isSelected
             ? "bg-pink-100 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400 font-medium"
             : "text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800"
           }
-          `}
+                    `}
         >
           <button
             onClick={(e) => {
@@ -220,6 +219,7 @@ function SessionItem({
           <span className="flex-1 truncate text-left">{session.sessionTitle}</span>
         </button>
 
+        {/* Actions Menu */}
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -256,6 +256,7 @@ function SessionItem({
         )}
       </div>
 
+      {/* Expanded Sub-items */}
       {isExpanded && (
         <div className="ml-6 mt-1 space-y-0.5">
           <button className="w-full flex items-center gap-2 px-3 py-1 rounded-lg text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800">
@@ -269,6 +270,7 @@ function SessionItem({
         </div>
       )}
 
+      {/* Modals */}
       <SessionEditModal
         open={openEdit}
         onClose={() => setOpenEdit(false)}

@@ -1,75 +1,49 @@
 "use client";
 
-import { useState } from "react";
-import Checkbox from "@/app/components/ui/form/Checkbox";
-import { requestDocumentSummary } from "@/lib/rest/summary/summary.rest";
-import { toast } from "sonner";
-import { FileText, Sparkles } from "lucide-react";
+import { File } from "lucide-react";
 
-type Props = {
-  file: {
-    fileId: number;
-    fileName: string;
-  };
+interface FileData {
+  fileId: number;
+  fileName: string;
+  fileType?: string | null;
+  fileSize?: number | null;
+  regdate?: string | null;
+}
+
+interface Props {
+  file: FileData;
   sessionId: number;
-};
+}
 
 export default function DocumentListItem({ file, sessionId }: Props) {
-  const [checked, setChecked] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const handleRequest = async () => {
-    if (!checked) {
-      toast.info("요약할 문서를 선택해주세요");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      await requestDocumentSummary({
-        fileId: file.fileId,
-        sessionId,
-        roundNo: 2,
-      });
-      toast.success("AI 요약 요청이 접수되었습니다");
-    } catch (e) {
-      toast.error("요약 요청 실패");
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    <div className="group flex items-center gap-4 px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-pink-300 dark:hover:border-pink-800 hover:shadow-md transition-all bg-white dark:bg-slate-900">
-      {/* Icon */}
-      <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 group-hover:bg-pink-100 dark:group-hover:bg-pink-900/20 transition-colors">
-        <FileText size={20} className="text-pink-500" />
+    <div className="group flex items-center gap-3 sm:gap-4 px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-pink-300 dark:hover:border-pink-800 hover:bg-pink-50 dark:hover:bg-pink-900/10 transition-all bg-white dark:bg-slate-900">
+      <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 group-hover:bg-pink-100 dark:group-hover:bg-pink-900/20 transition-colors flex-shrink-0">
+        <File size={18} className="text-blue-500" />
       </div>
 
-      {/* File Info */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <Checkbox
-            label=""
-            checked={checked}
-            onChange={setChecked}
-          />
-          <h3 className="font-medium text-sm text-slate-800 dark:text-slate-200 truncate">
-            {file.fileName}
-          </h3>
+        <h3 className="font-medium text-sm sm:text-base text-slate-800 dark:text-slate-200 truncate mb-1">
+          {file.fileName}
+        </h3>
+        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+          <span>
+            {file.regdate
+              ? new Date(file.regdate).toLocaleDateString("ko-KR", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })
+              : "방금 전"}
+          </span>
+          {file.fileSize && (
+            <>
+              <span>•</span>
+              <span>{(file.fileSize / 1024).toFixed(2)} KB</span>
+            </>
+          )}
         </div>
       </div>
-
-      {/* Action Button */}
-      <button
-        disabled={!checked || loading}
-        onClick={handleRequest}
-        className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg bg-gradient-to-r from-pink-500 to-violet-500 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-lg transition-all"
-      >
-        <Sparkles size={14} />
-        {loading ? "요청 중..." : "요약"}
-      </button>
     </div>
   );
 }

@@ -14,17 +14,24 @@ export default function NotesPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState("recent");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   const { data, loading } = useNotesBySession(Number(sessionId));
   const notes = data?.notesBySession ?? [];
 
+  // 페이지네이션 적용
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedNotes = notes.slice(startIndex, endIndex);
+  const totalPages = Math.ceil(notes.length / itemsPerPage);
+
   const handleNoteClick = (noteId: number) => {
-    // 전체 화면 에디터로 이동
     router.push(`/workspace/${sessionId}/notes/${noteId}`);
   };
 
   return (
-    <div className="h-full flex flex-col bg-white dark:bg-slate-950">
+    <div className="h-full flex flex-col bg-white dark:bg-slate-950 overflow-hidden">
       <NotesFilterBar
         sortBy={sortBy}
         viewMode={viewMode}
@@ -57,13 +64,60 @@ export default function NotesPage() {
             </Link>
           </div>
         ) : (
-          <div className="p-6">
-            {viewMode === "grid" ? (
-              <NotesGridView notes={notes} onNoteClick={handleNoteClick} />
-            ) : (
-              <NotesListView notes={notes} onNoteClick={handleNoteClick} />
+          <>
+            <div className="p-4 sm:p-6">
+              {viewMode === "grid" ? (
+                <NotesGridView notes={paginatedNotes} onNoteClick={handleNoteClick} />
+              ) : (
+                <NotesListView notes={paginatedNotes} onNoteClick={handleNoteClick} />
+              )}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 pb-6">
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 rounded border text-sm disabled:opacity-50 hover:bg-slate-100 dark:hover:bg-slate-800"
+                >
+                  이전
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(
+                    (page) =>
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 2 && page <= currentPage + 2)
+                  )
+                  .map((page, idx, arr) => (
+                    <React.Fragment key={page}>
+                      {idx > 0 && arr[idx - 1] !== page - 1 && (
+                        <span className="px-2">...</span>
+                      )}
+                      <button
+                        onClick={() => setCurrentPage(page)}
+                        className={`px-3 py-1.5 rounded text-sm transition-colors ${
+                          currentPage === page
+                            ? "bg-pink-500 text-white"
+                            : "hover:bg-slate-100 dark:hover:bg-slate-800"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    </React.Fragment>
+                  ))}
+
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 rounded border text-sm disabled:opacity-50 hover:bg-slate-100 dark:hover:bg-slate-800"
+                >
+                  다음
+                </button>
+              </div>
             )}
-          </div>
+          </>
         )}
       </div>
     </div>
