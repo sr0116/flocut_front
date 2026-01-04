@@ -16,29 +16,27 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
   const router = useRouter();
   const pathname = usePathname();
 
-  const { user, loading } = useAuthState();
+  const { user, loading, initialized } = useAuthState();
   const { ensureAuth } = useAuthActions();
   const checkedRef = useRef(false);
 
   useEffect(() => {
     if (checkedRef.current) return;
     checkedRef.current = true;
+    ensureAuth();
+  }, [ensureAuth]);
 
-    (async () => {
-      const ok = await ensureAuth();
-      if (!ok) {
-        router.replace(`/login?from=${pathname}`);
-      }
-    })();
-  }, [ensureAuth, pathname, router]);
-
-  if (loading || !user) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        인증 확인 중...
-      </div>
-    );
+  // 아직 인증 확인 자체가 끝나지 않음
+  if (!initialized || loading) {
+    return null; // 여기서 아무것도 렌더링하지 않음
   }
+
+  // 인증 확인은 끝났는데, 유저가 없음 → 로그인
+  if (!user) {
+    router.replace(`/login?from=${pathname}`);
+    return null;
+  }
+
 
   return (
     <div className="h-screen flex flex-col bg-background-light dark:bg-background-dark">
