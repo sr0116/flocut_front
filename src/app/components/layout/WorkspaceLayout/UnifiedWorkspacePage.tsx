@@ -393,7 +393,7 @@ export default function UnifiedWorkspacePage() {
                                 className="mx-auto mb-4 text-text-muted-light dark:text-text-muted-dark"
                             />
                             <h3 className="text-lg font-semibold text-text-primary-light dark:text-text-primary-dark mb-2">
-                                아이템이 없습니다
+                                노트가 없습니다
                             </h3>
                             <p className="text-sm text-text-muted-light dark:text-text-muted-dark mb-6">
                                 새 노트를 만들거나 문서를 업로드해보세요

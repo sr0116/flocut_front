@@ -1,47 +1,38 @@
 "use client";
 
-interface Props {
-  saved: boolean;
-  wordCount?: number;
-  charCount?: number;
-}
+type PanelFooterProps = {
+    saved: boolean;
+    saving?: boolean;
+    charCount?: number;
+    wordCount?: number;
+};
 
 export default function PanelFooter({
-                                      saved,
-                                      wordCount,
-                                      charCount,
-                                    }: Props) {
-  return (
-    <div
-      className="
-        h-10 flex items-center justify-between
-        px-4 text-xs
-        border-t border-slate-200 dark:border-slate-800
-        text-slate-500 dark:text-slate-400
-      "
-    >
-      <div className="flex items-center gap-2">
-        {typeof charCount === "number" && (
-          <span>{charCount.toLocaleString()} 글자</span>
-        )}
-        {typeof wordCount === "number" && (
-          <span className="hidden sm:inline">
-            • {wordCount.toLocaleString()} 단어
-          </span>
-        )}
-      </div>
+                                        saved,
+                                        saving = false,
+                                        charCount = 0,
+                                        wordCount = 0,
+                                    }: PanelFooterProps) {
+    return (
+        <div className="h-10 flex items-center justify-between px-4 text-xs border-t border-border-light dark:border-border-dark bg-white dark:bg-surface-dark text-text-muted-light dark:text-text-muted-dark">
+            {/* 좌측: 통계 */}
+            <div className="flex items-center gap-3">
+                <span>{charCount.toLocaleString()}자</span>
+                <span>•</span>
+                <span className="hidden sm:inline">{wordCount.toLocaleString()}단어</span>
+            </div>
 
-      <div className="flex items-center gap-2">
-        <div
-          className={`
-            w-2 h-2 rounded-full
-            ${saved ? "bg-green-500" : "bg-yellow-500 animate-pulse"}
-          `}
-        />
-        <span className="hidden sm:inline">
-          {saved ? "저장됨" : "저장 중"}
+            {/* 우측: 저장 상태 */}
+            <div className="flex items-center gap-2">
+                <div
+                    className={`w-2 h-2 rounded-full ${
+                        saving ? "bg-yellow-500 animate-pulse" : saved ? "bg-green-500" : "bg-red-500"
+                    }`}
+                />
+                <span className="hidden sm:inline">
+          {saving ? "저장 중..." : saved ? "자동 저장됨" : "저장 안됨"}
         </span>
-      </div>
-    </div>
-  );
+            </div>
+        </div>
+    );
 }
