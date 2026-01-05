@@ -1,123 +1,172 @@
 "use client";
 
-import { FileText, Mic, File } from "lucide-react";
+import { FileText, File, Mic, Clock, MoreVertical } from "lucide-react";
 import Checkbox from "@/app/components/ui/form/Checkbox";
+import { useState, useRef, useEffect } from "react";
 
-
-// WorkspaceItem 타입 (부모에서 전달받는 데이터 형식)
-
-type WorkspaceItem = {
-  id: string; // 고유 ID (예: "note-123" 또는 "document-456")
-  type: "note" | "document" | "audio"; // 타입
-  title: string; // 제목
-  date: string; // 생성/수정 날짜
-  sourceType?: string; // 소스 타입 (음성 노트인 경우 "AUDIO")
-  fileId?: number; // 파일 ID (문서/음성)
-  noteId?: number; // 노트 ID (노트)
+type WorkspaceListItemProps = {
+    item: {
+        id: string;
+        type: "note" | "document" | "audio";
+        title: string;
+        date: string;
+        noteId?: number;
+        fileId?: number;
+        status?: string;
+    };
+    sessionId: number;
+    selected: boolean;
+    onToggleSelect: () => void;
+    onClick: () => void;
 };
-
-
-// Props 정의
-
-type Props = {
-  item: WorkspaceItem; // 표시할 항목
-  sessionId: number; // 세션 ID
-  selected: boolean; // 선택 여부
-  onToggleSelect: () => void; // 선택 토글
-  onClick: () => void; // 아이템 클릭
-};
-
-
-// 메인 컴포넌트
 
 export default function WorkspaceListItem({
-                                            item,
-                                            sessionId,
-                                            selected,
-                                            onToggleSelect,
-                                            onClick,
-                                          }: Props) {
-  
-  // 타입별 아이콘 반환 (노트=초록, 문서=파랑, 음성=보라)
-  
-  const getIcon = () => {
-    switch (item.type) {
-      case "audio":
-        return <Mic size={18} className="text-purple-500 flex-shrink-0" />;
-      case "document":
-        return <File size={18} className="text-blue-500 flex-shrink-0" />;
-      default:
-        return <FileText size={18} className="text-green-500 flex-shrink-0" />;
-    }
-  };
+                                              item,
+                                              selected,
+                                              onToggleSelect,
+                                              onClick,
+                                          }: WorkspaceListItemProps) {
+    const [showMenu, setShowMenu] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
 
-  
-  // 타입별 라벨 (노트/문서/음성)
-  
-  const getTypeLabel = () => {
-    switch (item.type) {
-      case "audio":
-        return "음성";
-      case "document":
-        return "문서";
-      default:
-        return "노트";
-    }
-  };
+    // 메뉴 외부 클릭 시 닫기
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+                setShowMenu(false);
+            }
+        };
 
-  
-  // 렌더링
-  
-  return (
-    <div
-      onClick={onClick}
-      className={`
-        group flex items-center gap-3 sm:gap-4 px-3 sm:px-4 py-2 sm:py-3 rounded-lg
-        border border-transparent
-        hover:border-slate-200 dark:hover:border-slate-700
-        hover:bg-pink-50/50 dark:hover:bg-pink-900/10
-        transition-all cursor-pointer
-        ${selected ? "bg-pink-50 dark:bg-pink-900/20 border-pink-200 dark:border-pink-800" : ""}
-      `}
-    >
-      {/* 
-          체크박스 (클릭 시 부모의 선택 상태만 토글)
-           */}
-      <div onClick={(e) => e.stopPropagation()}>
-        <Checkbox label="" checked={selected} onChange={onToggleSelect} />
-      </div>
+        if (showMenu) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
 
-      {/* 
-          아이콘 (타입별로 다른 색상)
-           */}
-      <div className="flex-shrink-0">{getIcon()}</div>
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [showMenu]);
 
-      {/* 
-          제목 + 타입 라벨 + 날짜
-           */}
-      <div className="flex-1 min-w-0">
-        {/* 제목 + 타입 뱃지 */}
-        <div className="flex items-center gap-2 mb-1">
-          <h3 className="font-medium text-sm sm:text-base truncate text-slate-900 dark:text-slate-100">
-            {item.title}
-          </h3>
-          {/* 타입 라벨 (노트/문서/음성) */}
-          <span className="flex-shrink-0 px-2 py-0.5 rounded text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-            {getTypeLabel()}
-          </span>
+    // 아이콘 매핑
+    const iconMap = {
+        note: <FileText size={18} className="text-accent" />,
+        document: <File size={18} className="text-accent" />,
+        audio: <Mic size={18} className="text-accent" />,
+    };
+
+    // 상태 배지 매핑
+    const getStatusBadge = () => {
+        if (item.status === "PROCESSING") {
+            return (
+                <span className="px-2 py-0.5 rounded text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400">
+          처리 중
+        </span>
+            );
+        }
+        if (item.status === "COMPLETED") {
+            return (
+                <span className="px-2 py-0.5 rounded text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
+          완료
+        </span>
+            );
+        }
+        if (item.status === "FAILED") {
+            return (
+                <span className="px-2 py-0.5 rounded text-xs bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">
+          실패
+        </span>
+            );
+        }
+        return null;
+    };
+
+    // 체크박스 클릭 (이벤트 전파 중지)
+    const handleCheckboxClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        onToggleSelect();
+    };
+
+    // 메뉴 버튼 클릭
+    const handleMenuClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setShowMenu(!showMenu);
+    };
+
+    // 메뉴 아이템 클릭
+    const handleMenuAction = (action: string) => {
+        setShowMenu(false);
+        // TODO: 실제 액션 처리
+        console.log(action, item.id);
+    };
+
+    return (
+        <div
+            className={`group flex items-center gap-3 px-4 py-3 rounded-lg border transition-all cursor-pointer ${
+                selected
+                    ? "border-accent bg-accent-soft"
+                    : "border-transparent hover:bg-accent-soft hover:border-border-light dark:hover:border-border-dark"
+            }`}
+            onClick={onClick}
+        >
+            {/* 체크박스 */}
+            <div onClick={handleCheckboxClick}>
+                <Checkbox checked={selected} onChange={onToggleSelect} />
+            </div>
+
+            {/* 아이콘 */}
+            <div className="flex-shrink-0">{iconMap[item.type]}</div>
+
+            {/* 내용 */}
+            <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                    <h3 className="font-medium text-text-primary-light dark:text-text-primary-dark truncate">
+                        {item.title}
+                    </h3>
+                    {getStatusBadge()}
+                </div>
+                <div className="flex items-center gap-2 text-xs text-text-muted-light dark:text-text-muted-dark mt-1">
+                    <Clock size={12} />
+                    {new Date(item.date).toLocaleDateString("ko-KR", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                    })}
+                </div>
+            </div>
+
+            {/* 우측 메뉴 버튼 */}
+            <div className="relative flex-shrink-0" ref={menuRef}>
+                <button
+                    onClick={handleMenuClick}
+                    className="p-2 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-surface-light dark:hover:bg-surface-input transition-all"
+                >
+                    <MoreVertical size={16} className="text-text-muted-light dark:text-text-muted-dark" />
+                </button>
+
+                {/* 드롭다운 메뉴 */}
+                {showMenu && (
+                    <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-lg shadow-lg z-10 py-1">
+                        <button
+                            onClick={() => handleMenuAction("summary")}
+                            className="w-full px-4 py-2 text-left text-sm text-text-primary-light dark:text-text-primary-dark hover:bg-accent-soft transition-colors"
+                        >
+                            AI 요약
+                        </button>
+                        <button
+                            onClick={() => handleMenuAction("compare")}
+                            className="w-full px-4 py-2 text-left text-sm text-text-primary-light dark:text-text-primary-dark hover:bg-accent-soft transition-colors"
+                        >
+                            비교
+                        </button>
+                        <div className="h-px bg-border-light dark:bg-border-dark my-1" />
+                        <button
+                            onClick={() => handleMenuAction("delete")}
+                            className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                        >
+                            삭제
+                        </button>
+                    </div>
+                )}
+            </div>
         </div>
-
-        {/* 날짜 (작은 글씨로 표시) */}
-        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-          {new Date(item.date).toLocaleDateString("ko-KR", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
-        </p>
-      </div>
-    </div>
-  );
+    );
 }

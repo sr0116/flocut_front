@@ -1,81 +1,86 @@
 "use client";
 
-import { useRef, useState } from "react";
+import {useRef, useState} from "react";
 import Button from "@/app/components/ui/button/Button";
-import { Upload } from "lucide-react";
-import { uploadFile } from "@/lib/rest/file/file.rest";
-import { requestDocumentSummary } from "@/lib/rest/summary/summary.rest";
-import { toast } from "sonner";
+import {Upload} from "lucide-react";
+import {uploadFile} from "@/lib/rest/file/file.rest";
+import {requestDocumentSummary} from "@/lib/rest/summary/summary.rest";
+import {toast} from "sonner";
 
 type FileUploadButtonProps = {
-  sessionId: number;
-  requestSummary?: boolean;
-  onSuccess?: () => void;
+    sessionId: number;
+    //  요약 API를 자동으로 호출할지 여부
+    requestSummary?: boolean;
+    //  업로드 완료 직후 실행 (파일 목록 새로고침용)
+    onUploadComplete?: () => void;
+    // 모든 작업 완료 후 실행 (페이지 이동 등)
+    onSuccess?: () => void;
 };
 
 export default function FileUploadButton({
-                                           sessionId,
-                                           requestSummary = false,
-                                           onSuccess,
+                                             sessionId,
+                                             requestSummary = false,
+                                             onUploadComplete,
+                                             onSuccess,
                                          }: FileUploadButtonProps) {
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  const openPicker = () => {
-    if (!loading) inputRef.current?.click();
-  };
+    const inputRef = useRef<HTMLInputElement | null>(null);
+    const [loading, setLoading] = useState(false);
 
-  const handleChange = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const openPicker = () => {
+        if (!loading) inputRef.current?.click();
+    };
 
-    setLoading(true);
+    const handleChange = async (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
 
-    try {
-      //  파일 업로드
-      const uploaded = await uploadFile(file);
-      toast.success("문서 업로드 완료");
+        setLoading(true);
 
-      // 체크된 경우만 요약 요청
-      if (requestSummary) {
-        await requestDocumentSummary({
-          fileId: uploaded.fileId, //  업로드 응답 기준
-          sessionId,
-          roundNo: 1,
-        });
-        toast.success("AI 요약 요청이 접수되었습니다.");
-      }
+        try {
+            //  파일 업로드
+            const uploaded = await uploadFile(file);
+            toast.success("문서 업로드 완료");
 
-      onSuccess?.();
-    } catch (err) {
-      console.error(err);
-      toast.error("업로드 또는 요약 요청 실패");
-    } finally {
-      setLoading(false);
-      e.target.value = "";
-    }
-  };
+            //   업로드 완료 직후
+            onUploadComplete?.();
 
-  return (
-    <>
-      <Button
-        variant="secondary"
-        onClick={openPicker}
-        disabled={loading}
-      >
-        <Upload size={18} />
-        {loading ? "업로드 중..." : "문서 업로드"}
-      </Button>
+            // 체크된 경우만 요약 요청
+            if (requestSummary) {
+                await requestDocumentSummary({
+                    fileId: uploaded.fileId,
+                    sessionId,
+                    roundNo: 1,
+                });
+                toast.success("AI 요약 요청이 접수되었습니다.");
+            }
+            // 모든 작업 완료 후
+            onSuccess?.();
+        } catch (err) {
+            console.error(err);
+            toast.error("업로드 또는 요약 요청 실패");
+        } finally {
+            setLoading(false);
+            e.target.value = "";
+        }
+    };
 
-      <input
-        ref={inputRef}
-        type="file"
-        className="hidden"
-        onChange={handleChange}
-        accept=".pdf,.docx,.txt"
-      />
-    </>
-  );
+    return (
+        <>
+            <Button variant="secondary" size="sm" onClick={openPicker} disabled={loading}>
+                <Upload size={16} />
+                {loading ? "업로드 중..." : "문서 업로드"}
+            </Button>
+
+            <input
+                ref={inputRef}
+                type="file"
+                className="hidden"
+                onChange={handleChange}
+                accept=".pdf,.docx,.txt"
+            />
+        </>
+    );
 }

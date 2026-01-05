@@ -129,17 +129,18 @@ export default function EditorContainer({
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden bg-white dark:bg-slate-950">
       {/* 상단 액션 툴바 */}
-      <EditorToolbar
-        isEditing={true}
-        saving={saving}
-        saved={saved}
-        onSave={handleSave}
-        onToggleEdit={() => {}}
-        onAIAction={onAIAction}
-        onToggleRightPanel={onToggleRightPanel}
-        rightPanelOpen={rightPanelOpen}
-        editorContent={editor?.getHTML() ?? ""}
-      />
+        <EditorToolbar
+            editor={editor} // 이 부분이 누락되어 있었을 가능성이 큽니다.
+            isEditing={true}
+            saving={saving}
+            saved={saved}
+            onSave={handleSave}
+            onToggleEdit={() => {}}
+            onAIAction={onAIAction}
+            onToggleRightPanel={onToggleRightPanel}
+            rightPanelOpen={rightPanelOpen}
+            editorContent={editor?.getHTML() ?? ""}
+        />
 
       {/* 포맷팅 툴바 */}
       <EditorFormattingToolbar editor={editor} />
@@ -165,7 +166,20 @@ export default function EditorContainer({
             })}
           </div>
 
-          <TiptapEditor editor={editor} />
+            // src/app/components/notes/editor/EditorContainer.tsx 내 렌더링 부분 수정
+
+            <EditorToolbar
+                editor={editor}
+                isEditing={true}
+                saving={saving}
+                saved={saved}
+                onSave={handleSave}
+                onToggleEdit={() => {}}
+                onAIAction={onAIAction}
+                onToggleRightPanel={onToggleRightPanel}
+                rightPanelOpen={rightPanelOpen}
+                editorContent={editor?.getHTML() ?? ""}
+            />
         </div>
       </div>
 
