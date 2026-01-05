@@ -20,6 +20,7 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
   const { ensureAuth } = useAuthActions();
   const checkedRef = useRef(false);
 
+  //  최초 인증
   useEffect(() => {
     if (checkedRef.current) return;
     checkedRef.current = true;
@@ -27,15 +28,21 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
   }, [ensureAuth]);
 
   // 아직 인증 확인 자체가 끝나지 않음
-  if (!initialized || loading) {
-    return null; // 여기서 아무것도 렌더링하지 않음
-  }
+    useEffect(() => {
+        if (!initialized || loading) return;
+        if (!user) {
+            router.replace(`/login?from=${pathname}`);
+        }
+    }, [initialized, loading, user, pathname, router]);
 
-  // 인증 확인은 끝났는데, 유저가 없음 → 로그인
-  if (!user) {
-    router.replace(`/login?from=${pathname}`);
-    return null;
-  }
+  // 렌더 가드
+    if (!initialized || loading) {
+        return null;
+    }
+
+    if (!user) {
+        return null;
+    }
 
 
   return (
