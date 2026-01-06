@@ -5,7 +5,7 @@ import NotesFilterBar from "@/app/components/notes/NotesFilterBar";
 import NotesGridView from "@/app/components/notes/NotesGridView";
 import NotesListView from "@/app/components/notes/NotesListView";
 import { useParams, useRouter } from "next/navigation";
-import { useNotesBySession } from "@/hooks/notes/useNotesBySession";
+import { useNoteDetail } from "@/hooks/notes/useNoteDetail";
 import { FileText, Loader2 } from "lucide-react";
 import Link from "next/link";
 
@@ -19,7 +19,7 @@ export default function NotesPage() {
 
   const itemsPerPage = 20;
 
-  const { data, loading } = useNotesBySession(Number(sessionId));
+  const { data, loading } = useNoteDetail(Number(sessionId));
   const notes = data?.notesBySession ?? [];
 
   // 페이지네이션

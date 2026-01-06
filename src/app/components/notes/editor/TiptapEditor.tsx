@@ -1,6 +1,6 @@
 "use client";
 
-import { useEditor, EditorContent, Editor } from "@tiptap/react";
+import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
@@ -9,8 +9,17 @@ import Color from "@tiptap/extension-color";
 import Placeholder from "@tiptap/extension-placeholder";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
-import {useEffect, useState} from "react";
-import {TextStyle} from "@tiptap/extension-text-style";
+import { TextStyle } from "@tiptap/extension-text-style";
+import { useEffect, useState } from "react";
+import { Editor } from "@tiptap/react";
+
+// Components
+import BubbleMenuToolbar from "./BubbleMenuToolbar";
+import MobileBottomToolbar from "./MobileBottomToolbar";
+
+// ============================================
+// Types
+// ============================================
 
 type TiptapEditorProps = {
     content: string;
@@ -18,7 +27,12 @@ type TiptapEditorProps = {
     placeholder?: string;
     editable?: boolean;
     onReady?: (editor: Editor) => void;
+    showMobileToolbar?: boolean;
 };
+
+// ============================================
+// Main Component
+// ============================================
 
 export default function TiptapEditor({
                                          content,
@@ -26,16 +40,28 @@ export default function TiptapEditor({
                                          placeholder = "내용을 입력하세요...",
                                          editable = true,
                                          onReady,
+                                         showMobileToolbar = true,
                                      }: TiptapEditorProps) {
+    // --------------------------------------------
+    // State
+    // --------------------------------------------
+
     const [isMounted, setIsMounted] = useState(false);
 
-    // 클라이언트에서만 렌더링
+    // --------------------------------------------
+    // Effects - 클라이언트 마운트
+    // --------------------------------------------
+
     useEffect(() => {
         setIsMounted(true);
     }, []);
 
+    // --------------------------------------------
+    // Editor 초기화
+    // --------------------------------------------
+
     const editor = useEditor({
-        immediatelyRender: false, // SSR 방지
+        immediatelyRender: false,
         extensions: [
             StarterKit.configure({
                 heading: {
@@ -62,7 +88,7 @@ export default function TiptapEditor({
             Link.configure({
                 openOnClick: false,
                 HTMLAttributes: {
-                    class: "text-accent underline cursor-pointer hover:text-accent-dark",
+                    class: "text-accent underline cursor-pointer hover:bg accent-dark",
                 },
             }),
             Image.configure({
@@ -90,7 +116,10 @@ export default function TiptapEditor({
         },
     });
 
-    // content prop 변경 시 에디터 업데이트 (무한 루프 방지)
+    // --------------------------------------------
+    // Effects - content 변경 시 업데이트
+    // --------------------------------------------
+
     useEffect(() => {
         if (editor && content !== editor.getHTML()) {
             const { from, to } = editor.state.selection;
@@ -99,7 +128,6 @@ export default function TiptapEditor({
                 emitUpdate: false,
             });
 
-            // 커서 위치 복원 (범위 검증)
             const maxPos = editor.state.doc.content.size;
             const safeFrom = Math.min(from, maxPos);
             const safeTo = Math.min(to, maxPos);
@@ -108,14 +136,20 @@ export default function TiptapEditor({
         }
     }, [content, editor]);
 
-    // 에디터 준비 완료 시 콜백
+    // --------------------------------------------
+    // Effects - 에디터 준비 완료 콜백
+    // --------------------------------------------
+
     useEffect(() => {
         if (editor && onReady) {
             onReady(editor);
         }
     }, [editor, onReady]);
 
-    // 에디터 정리
+    // --------------------------------------------
+    // Effects - 에디터 정리
+    // --------------------------------------------
+
     useEffect(() => {
         return () => {
             if (editor) {
@@ -124,7 +158,10 @@ export default function TiptapEditor({
         };
     }, [editor]);
 
-    // 클라이언트에서만 렌더링
+    // --------------------------------------------
+    // Render - Loading
+    // --------------------------------------------
+
     if (!isMounted || !editor) {
         return (
             <div className="flex items-center justify-center min-h-[200px] text-text-muted-light dark:text-text-muted-dark">
@@ -133,9 +170,20 @@ export default function TiptapEditor({
         );
     }
 
+    // --------------------------------------------
+    // Render - Main
+    // --------------------------------------------
+
     return (
         <div className="tiptap-wrapper">
+            {/* Bubble Menu */}
+            {editable && <BubbleMenuToolbar editor={editor} />}
+
+            {/* 에디터 본문 */}
             <EditorContent editor={editor} />
+
+            {/* 모바일 하단 툴바 */}
+            {editable && showMobileToolbar && <MobileBottomToolbar editor={editor} />}
         </div>
     );
 }

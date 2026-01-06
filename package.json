@@ -12,6 +12,7 @@
     "@apollo/client": "^4.0.10",
     "@hookform/resolvers": "^5.2.2",
     "@reduxjs/toolkit": "^2.11.1",
+    "@tiptap/extension-bubble-menu": "^3.15.0",
     "@tiptap/extension-character-count": "^3.13.0",
     "@tiptap/extension-color": "^3.13.0",
     "@tiptap/extension-highlight": "^3.13.0",

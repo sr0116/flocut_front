@@ -13,7 +13,7 @@ import {
     Loader2,
 } from "lucide-react";
 
-import { useNotesBySession } from "@/hooks/notes/useNotesBySession";
+import { useNoteDetail } from "@/hooks/notes/useNoteDetail";
 import { useMyFiles } from "@/hooks/files/useMyFiles";
 
 import Button from "@/app/components/ui/button/Button";
@@ -58,7 +58,7 @@ export default function UnifiedWorkspacePage() {
         data: notesData,
         loading: notesLoading,
         refetch: refetchNotes,
-    } = useNotesBySession(Number(sessionId));
+    } = useNoteDetail(Number(sessionId));
 
     const {
         files,

@@ -249,3 +249,35 @@
         font-size: 1.25rem;
     }
 }
+
+     /* ============================================ */
+     /* Bubble Menu Styles (TipTap v3)              */
+     /* ============================================ */
+
+     /* Bubble Menu 컨테이너 */
+     .bubble-menu-container {
+         max-width: none;
+         transition: transform 0.1s ease, opacity 0.1s ease;
+         animation: bubble-menu-appear 0.15s ease-out;
+     }
+
+     /* Bubble Menu 나타나는 애니메이션 */
+     @keyframes bubble-menu-appear {
+         from {
+             opacity: 0;
+             transform: translateY(4px);
+         }
+         to {
+             opacity: 1;
+             transform: translateY(0);
+         }
+     }
+
+     /* ============================================ */
+     /* Mobile Bottom Toolbar                        */
+     /* ============================================ */
+
+     /* 모바일 Safe Area */
+     .safe-area-pb {
+         padding-bottom: env(safe-area-inset-bottom);
+     }

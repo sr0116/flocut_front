@@ -1,27 +1,21 @@
-import {NOTE_DETAIL_QUERY} from "@/lib/graphql/note/note.query";
-import {NoteDetail, NoteDetailGQL} from "@/lib/graphql/note/note.type";
-import {useQuery} from "@apollo/client/react";
 
+import { useEffect, useState } from "react";
+import { getNoteDetail } from "@/lib/rest/note/notes.rest";
+import {NoteDetailResponse} from "@/lib/graphql/note/note.type";
+
+//  상세 조회는 레스트(레디스 병합 보장을 위해)
 export function useNoteDetail(noteId?: number) {
-  const { data, loading } = useQuery<
-    { note: NoteDetailGQL },
-    { noteId: number }
-  >(NOTE_DETAIL_QUERY, {
-    skip: !noteId,
-    variables: { noteId: noteId as number },
-  });
+    const [note, setNote] = useState<NoteDetailResponse | null>(null);
+    const [loading, setLoading] = useState(false);
 
-  const note: NoteDetail | null = data?.note
-    ? {
-      noteId: data.note.noteId,
-      title: data.note.title ?? "",
-      content: data.note.content ?? "",
-      sourceType: data.note.sourceType as any,
-      sourceId: data.note.sourceId ?? null,
-      createdDate: data.note.regdate ?? "",
-      modifiedDate: data.note.moddate ?? "",
-    }
-    : null;
+    useEffect(() => {
+        if (!noteId) return;
 
-  return { note, loading };
+        setLoading(true);
+        getNoteDetail(noteId)
+            .then(setNote)
+            .finally(() => setLoading(false));
+    }, [noteId]);
+
+    return { note, loading };
 }

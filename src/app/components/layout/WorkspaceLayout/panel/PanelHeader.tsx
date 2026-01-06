@@ -5,6 +5,10 @@ import Button from "@/app/components/ui/button/Button";
 import IconButton from "@/app/components/ui/icon-button/IconButton";
 import { useRouter } from "next/navigation";
 
+// ============================================
+// Types
+// ============================================
+
 export type PanelTab = "edit" | "summary" | "feedback" | "compare" | "calendar";
 
 type PanelHeaderProps = {
@@ -19,6 +23,10 @@ type PanelHeaderProps = {
     noteId?: number;
 };
 
+// ============================================
+// Main Component
+// ============================================
+
 export default function PanelHeader({
                                         type,
                                         currentTab,
@@ -30,10 +38,19 @@ export default function PanelHeader({
                                         sessionId,
                                         noteId,
                                     }: PanelHeaderProps) {
+    // --------------------------------------------
+    // Router
+    // --------------------------------------------
+
     const router = useRouter();
+
+    // --------------------------------------------
+    // Render
+    // --------------------------------------------
 
     return (
         <div className="flex items-center justify-between px-4 py-3 border-b border-border-light dark:border-border-dark bg-white dark:bg-surface-dark">
+
             {/* 좌측: 탭 */}
             <div className="flex items-center gap-1 overflow-x-auto">
                 <TabButton
@@ -60,7 +77,8 @@ export default function PanelHeader({
                     icon={<GitCompare size={14} />}
                     active={currentTab === "compare"}
                     onClick={() => onChangeTab("compare")}
-                    disabled={type !== "note"}
+                    disabled={true} // 비교 기능 비활성화
+                    badge="준비중" // 준비중 뱃지
                 />
                 <TabButton
                     label="일정"
@@ -73,6 +91,7 @@ export default function PanelHeader({
 
             {/* 우측: 액션 버튼 */}
             <div className="flex items-center gap-2">
+
                 {/* 전체 화면으로 열기 */}
                 {type === "note" && noteId && (
                     <IconButton
@@ -103,18 +122,23 @@ export default function PanelHeader({
     );
 }
 
-// 탭 버튼
+// ============================================
+// Sub Components
+// ============================================
+
 function TabButton({
                        label,
                        icon,
                        active,
                        disabled,
+                       badge,
                        onClick,
                    }: {
     label: string;
     icon?: React.ReactNode;
     active: boolean;
     disabled?: boolean;
+    badge?: string;
     onClick: () => void;
 }) {
     return (
@@ -122,7 +146,7 @@ function TabButton({
             disabled={disabled}
             onClick={onClick}
             className={`
-        flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors whitespace-nowrap
+        relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors whitespace-nowrap
         ${
                 active
                     ? "bg-accent text-white"
@@ -133,6 +157,13 @@ function TabButton({
         >
             {icon}
             <span className="hidden sm:inline">{label}</span>
+
+            {/* 준비중 뱃지 */}
+            {badge && (
+                <span className="absolute -top-1 -right-1 px-1.5 py-0.5 text-[10px] font-semibold rounded bg-yellow-500 text-white">
+          {badge}
+        </span>
+            )}
         </button>
     );
 }
