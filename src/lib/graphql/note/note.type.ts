@@ -38,25 +38,6 @@ export interface NotesByStatusResponse {
     notesByStatus: NoteListItem[];
 }
 
-// 노트 상세 조회
-// 실제 편집 화면에서 사용하는 타입
-export interface NoteDetailResponse {
-    noteId: number;
-    sessionId: number;
-
-    title: string | null;
-    content: string | null;
-
-    sourceType: NoteSourceType;
-    sourceId: number | null;
-
-    status: NoteStatus;
-
-    regdate: string;
-    moddate: string;
-}
-
-
 
 // 노트 수정 입력값
 // Redis + DB 병합 결과

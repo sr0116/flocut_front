@@ -1,10 +1,22 @@
+// app/components/layout/WorkspaceLayout/GlobalNav.tsx
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
-  Home, Clock, Star, FileText, Users, Archive,
-  Folder, Plus, Settings, ChevronLeft, ChevronRight,
-  ChevronDown, MoreHorizontal, Edit3, Trash2
+  Home,
+  Clock,
+  Star,
+  FileText,
+  Folder,
+  Plus,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  MoreHorizontal,
+  Edit3,
+  Trash2,
 } from "lucide-react";
 import { useSessions } from "@/hooks/sessions/useSessions";
 import CreateSessionModal from "../../sessions/CreateSessionModal";
@@ -24,13 +36,16 @@ export default function GlobalNav({
                                     selectedSessionId,
                                     onSessionSelect,
                                   }: Props) {
+  const router = useRouter();
   const [openCreate, setOpenCreate] = useState(false);
-  const [expandedSessions, setExpandedSessions] = useState<Set<number>>(new Set());
+  const [expandedSessions, setExpandedSessions] = useState<Set<number>>(
+    new Set()
+  );
 
   const { sessions, refetch } = useSessions();
 
   const globalNav = [
-    { href: "/", label: "홈", icon: Home },
+    { href: "/workspace", label: "홈", icon: Home },
     { href: "/recent", label: "최근 문서", icon: Clock },
     { href: "/favorites", label: "즐겨찾기", icon: Star },
     { href: "/notes", label: "모든 노트", icon: FileText },
@@ -46,23 +61,35 @@ export default function GlobalNav({
     setExpandedSessions(newExpanded);
   };
 
+  const handleTrashClick = () => {
+    if (selectedSessionId) {
+      router.push(`/workspace/${selectedSessionId}/trash`);
+    } else if (sessions.length > 0) {
+      router.push(`/workspace/${sessions[0].sessionId}/trash`);
+    }
+  };
+
   return (
-    <aside className={`
-            h-full flex-shrink-0 transition-all duration-300
-            bg-slate-50 dark:bg-slate-900
-            border-r border-slate-200 dark:border-slate-800
-            ${collapsed ? "w-16" : "w-64"}
-        `}>
+    <aside
+      className={`
+        h-full flex-shrink-0 transition-all duration-300
+        bg-slate-50 dark:bg-slate-900
+        border-r border-slate-200 dark:border-slate-800
+        ${collapsed ? "w-16" : "w-64"}
+      `}
+    >
       <nav className="flex flex-col h-full">
         {/* Header */}
-        <div className={`
-                    h-14 flex items-center px-4 border-b border-slate-200 dark:border-slate-800
-                    ${collapsed ? "justify-center" : "justify-between"}
-                `}>
+        <div
+          className={`
+            h-14 flex items-center px-4 border-b border-slate-200 dark:border-slate-800
+            ${collapsed ? "justify-center" : "justify-between"}
+          `}
+        >
           {!collapsed && (
             <span className="font-bold text-lg bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent">
-                            FLOCUT
-                        </span>
+              FLOCUT
+            </span>
           )}
           <button
             onClick={onToggle}
@@ -80,13 +107,14 @@ export default function GlobalNav({
               return (
                 <button
                   key={item.href}
+                  onClick={() => router.push(item.href)}
                   className={`
-                                        w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
-                                        transition-colors
-                                        text-slate-700 dark:text-slate-300
-                                        hover:bg-slate-100 dark:hover:bg-slate-800
-                                        ${collapsed ? "justify-center" : ""}
-                                    `}
+                    w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
+                    transition-colors
+                    text-slate-700 dark:text-slate-300
+                    hover:bg-slate-100 dark:hover:bg-slate-800
+                    ${collapsed ? "justify-center" : ""}
+                  `}
                 >
                   <Icon size={18} />
                   {!collapsed && <span>{item.label}</span>}
@@ -97,15 +125,17 @@ export default function GlobalNav({
 
           {/* Sessions */}
           <div>
-            <div className={`
-                            flex items-center justify-between px-2 mb-2
-                            ${collapsed ? "justify-center" : ""}
-                        `}>
+            <div
+              className={`
+                flex items-center justify-between px-2 mb-2
+                ${collapsed ? "justify-center" : ""}
+              `}
+            >
               {!collapsed ? (
                 <>
-                                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                                        세션
-                                    </span>
+                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                    세션
+                  </span>
                   <button
                     onClick={() => setOpenCreate(true)}
                     className="p-1 hover:bg-slate-200 dark:hover:bg-slate-800 rounded transition-colors"
@@ -124,7 +154,7 @@ export default function GlobalNav({
             </div>
 
             {!collapsed && (
-              <div className="space-y-0.5">
+              <div className="space-y-0.5 mb-2">
                 {sessions.map((session) => (
                   <SessionItem
                     key={session.sessionId}
@@ -139,6 +169,19 @@ export default function GlobalNav({
                 ))}
               </div>
             )}
+
+            {/* 휴지통 버튼 */}
+            <button
+              onClick={handleTrashClick}
+              className={`
+                w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
+                text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors
+                ${collapsed ? "justify-center" : ""}
+              `}
+            >
+              <Trash2 size={18} />
+              {!collapsed && <span>휴지통</span>}
+            </button>
           </div>
         </div>
 
@@ -146,12 +189,12 @@ export default function GlobalNav({
         <div className="p-3 border-t border-slate-200 dark:border-slate-800">
           <button
             className={`
-                            w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
-                            text-slate-700 dark:text-slate-300
-                            hover:bg-slate-100 dark:hover:bg-slate-800
-                            transition-colors
-                            ${collapsed ? "justify-center" : ""}
-                        `}
+              w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
+              text-slate-700 dark:text-slate-300
+              hover:bg-slate-100 dark:hover:bg-slate-800
+              transition-colors
+              ${collapsed ? "justify-center" : ""}
+            `}
           >
             <Settings size={18} />
             {!collapsed && <span>설정</span>}
@@ -161,12 +204,16 @@ export default function GlobalNav({
 
       <CreateSessionModal
         open={openCreate}
-        onClose={() => setOpenCreate(false)}
+        onClose={() => {
+          setOpenCreate(false);
+          refetch();
+        }}
       />
     </aside>
   );
 }
 
+// SessionItem 컴포넌트
 function SessionItem({
                        session,
                        isExpanded,
@@ -184,9 +231,15 @@ function SessionItem({
   onUpdated: () => void;
   onDeleted: () => void;
 }) {
+  const router = useRouter();
   const [openEdit, setOpenEdit] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+
+  const handleSessionClick = () => {
+    onSelect();
+    router.push(`/workspace/${session.sessionId}`);
+  };
 
   return (
     <div>
@@ -195,7 +248,7 @@ function SessionItem({
         <div
           role="button"
           tabIndex={0}
-          onClick={onSelect}
+          onClick={handleSessionClick}
           className={`
             w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm cursor-pointer
             transition-all
@@ -206,7 +259,7 @@ function SessionItem({
           }
           `}
         >
-          {/* Expand Toggle (NOT a button) */}
+          {/* Expand Toggle */}
           <div
             role="button"
             tabIndex={0}
@@ -245,9 +298,11 @@ function SessionItem({
         </button>
 
         {showMenu && (
-          <div className="absolute right-0 top-8 w-32 rounded-lg border
-                          border-slate-200 dark:border-slate-800
-                          bg-white dark:bg-slate-900 shadow-lg z-50 overflow-hidden">
+          <div
+            className="absolute right-0 top-8 w-32 rounded-lg border
+                        border-slate-200 dark:border-slate-800
+                        bg-white dark:bg-slate-900 shadow-lg z-50 overflow-hidden"
+          >
             <button
               onClick={() => {
                 setShowMenu(false);
@@ -277,15 +332,23 @@ function SessionItem({
       {/* Expanded Sub-items */}
       {isExpanded && (
         <div className="ml-6 mt-1 space-y-0.5">
-          <button className="w-full flex items-center gap-2 px-3 py-1 rounded-lg
-                             text-xs text-slate-600 dark:text-slate-400
-                             hover:bg-slate-200 dark:hover:bg-slate-800">
+          <button
+            onClick={() => router.push(`/workspace/${session.sessionId}/notes`)}
+            className="w-full flex items-center gap-2 px-3 py-1 rounded-lg
+                       text-xs text-slate-600 dark:text-slate-400
+                       hover:bg-slate-200 dark:hover:bg-slate-800"
+          >
             <FileText size={12} />
             노트
           </button>
-          <button className="w-full flex items-center gap-2 px-3 py-1 rounded-lg
-                             text-xs text-slate-600 dark:text-slate-400
-                             hover:bg-slate-200 dark:hover:bg-slate-800">
+          <button
+            onClick={() =>
+              router.push(`/workspace/${session.sessionId}/documents`)
+            }
+            className="w-full flex items-center gap-2 px-3 py-1 rounded-lg
+                       text-xs text-slate-600 dark:text-slate-400
+                       hover:bg-slate-200 dark:hover:bg-slate-800"
+          >
             <FileText size={12} />
             문서
           </button>

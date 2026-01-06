@@ -1,21 +1,32 @@
-
-import { useEffect, useState } from "react";
+// hooks/notes/useNoteDetail.ts
+import {useCallback, useEffect, useState} from "react";
 import { getNoteDetail } from "@/lib/rest/note/notes.rest";
-import {NoteDetailResponse} from "@/lib/graphql/note/note.type";
+import { NoteDetailResponse } from "@/lib/graphql/note/note.type";
 
-//  상세 조회는 레스트(레디스 병합 보장을 위해)
+// 노트 상세 조회 훅 (REST API 사용 - Redis + DB 병합)
+// 편집 화면에서 자동저장된 최신 데이터 조회용
 export function useNoteDetail(noteId?: number) {
-    const [note, setNote] = useState<NoteDetailResponse | null>(null);
-    const [loading, setLoading] = useState(false);
+  const [note, setNote] = useState<NoteDetailResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (!noteId) return;
+  // 로직을 fetchData 함수로 분리하여 재사용 가능하게 만듦
+  const fetchData = useCallback(() => {
+    if (!noteId) return;
+    setLoading(true);
+    getNoteDetail(noteId)
+      .then(setNote)
+      .catch((err) => {
+        console.error("노트 조회 실패:", err);
+        setError(err.response?.data?.message ?? "노트를 불러올 수 없습니다");
+      })
+      .finally(() => setLoading(false));
+  }, [noteId]);
 
-        setLoading(true);
-        getNoteDetail(noteId)
-            .then(setNote)
-            .finally(() => setLoading(false));
-    }, [noteId]);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
-    return { note, loading };
+  // refetch라는 이름으로 함수를 반환함
+  return { note, loading, error, refetch: fetchData };
 }
