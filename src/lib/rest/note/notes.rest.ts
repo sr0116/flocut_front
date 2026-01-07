@@ -34,7 +34,7 @@ export const hardDeleteNote = (noteId: number) =>
 
 // 휴지통 이동
 export const deleteNote = (noteId: number) =>
-  api.patch<void>(`/api/notes/${noteId}/trash`);
+    api.patch<void>(`/api/notes/${noteId}/trash`);
 
 // 세션 이동
 export const moveNote = (noteId: number, targetSessionId: number) =>
