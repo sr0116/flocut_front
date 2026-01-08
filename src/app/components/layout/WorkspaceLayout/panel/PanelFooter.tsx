@@ -1,4 +1,3 @@
-// components/layout/WorkspaceLayout/panel/PanelFooter.tsx
 "use client";
 
 type PanelFooterProps = {

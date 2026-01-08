@@ -3,9 +3,8 @@
 import { GitCompare, Bell } from "lucide-react";
 import Button from "@/app/components/ui/button/Button";
 
-// ============================================
+
 // Main Component
-// ============================================
 
 export default function CompareComingSoon() {
     return (
@@ -56,10 +55,8 @@ export default function CompareComingSoon() {
     );
 }
 
-// ============================================
-// Sub Components
-// ============================================
 
+// Sub Components
 function FeatureItem({ text }: { text: string }) {
     return (
         <li className="flex items-start gap-2 text-sm text-text-muted-light dark:text-text-muted-dark">

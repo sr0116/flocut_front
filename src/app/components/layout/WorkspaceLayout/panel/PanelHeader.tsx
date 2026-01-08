@@ -1,4 +1,3 @@
-// components/layout/WorkspaceLayout/panel/PanelHeader.tsx
 "use client";
 
 import { X, Save, Sparkles, MessageSquare, GitCompare, Calendar, Maximize2 } from "lucide-react";
