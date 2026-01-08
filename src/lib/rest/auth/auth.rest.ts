@@ -52,3 +52,14 @@ export function resetPassword(
         newPassword
     });
 }
+
+// 로그인된 사용자의 비밀번호 변경 (설정 페이지용)
+export function changePassword(
+    currentPassword: string,
+    newPassword: string
+): Promise<void> {
+    return api.post("/auth/password/change", {
+        currentPassword,
+        newPassword
+    });
+}
