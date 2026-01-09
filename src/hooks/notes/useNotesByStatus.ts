@@ -1,18 +1,12 @@
-// hooks/notes/useNotesByStatus.ts
-"use client";
-
-import { useQuery } from "@apollo/client/react";
-import { NOTES_BY_STATUS_QUERY } from "@/lib/graphql/note/note.query";
-import {
-    NotesByStatusResponse,
-    NoteStatus,
-} from "@/lib/graphql/note/note.type";
+import {NotesByStatusResponse, NoteStatus} from "@/lib/graphql/note/note.type";
+import {useQuery} from "@apollo/client/react";
+import {NOTES_BY_STATUS_QUERY} from "@/lib/graphql/note/note.query";
 
 export function useNotesByStatus(
     sessionId: number,
     status: NoteStatus,
-    page: number,
-    size: number
+    page: number = 0,
+    size: number = 20
 ) {
     const { data, loading, error, refetch } =
         useQuery<NotesByStatusResponse>(NOTES_BY_STATUS_QUERY, {
