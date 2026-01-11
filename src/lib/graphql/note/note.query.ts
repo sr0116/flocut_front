@@ -1,4 +1,3 @@
-// lib/graphql/note/note.query.ts
 import { gql } from "@apollo/client";
 
 export const NOTES_BY_STATUS_QUERY = gql`

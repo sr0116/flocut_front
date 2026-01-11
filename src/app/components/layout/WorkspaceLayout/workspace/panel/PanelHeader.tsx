@@ -34,7 +34,7 @@ export default function PanelHeader({
 
   return (
     <div className="flex items-center justify-between px-4 py-3 border-b border-border-light dark:border-border-dark bg-white dark:bg-surface-dark">
-      <div className="flex items-center gap-1 overflow-x-auto">
+      <div className="flex items-center gap-1 overflow-x-auto custom-scrollbar-hide">
         <TabButton
           label="편집"
           active={currentTab === "edit"}
@@ -45,7 +45,8 @@ export default function PanelHeader({
           icon={<Sparkles size={14} />}
           active={currentTab === "summary"}
           onClick={() => onChangeTab("summary")}
-          disabled={type !== "note"}
+          // 백엔드에서 노트와 문서 모두 요약을 지원하므로 오디오 외에는 활성화
+          disabled={type === "audio"}
         />
         <TabButton
           label="피드백"
@@ -80,6 +81,7 @@ export default function PanelHeader({
           />
         )}
 
+        {/* 노트 타입일 때만 수동 저장(Sync) 버튼 노출 */}
         {type === "note" && (
           <Button
             size="sm"
@@ -99,38 +101,20 @@ export default function PanelHeader({
   );
 }
 
-function TabButton({
-                     label,
-                     icon,
-                     active,
-                     disabled,
-                     badge,
-                     onClick,
-                   }: {
-  label: string;
-  icon?: React.ReactNode;
-  active: boolean;
-  disabled?: boolean;
-  badge?: string;
-  onClick: () => void;
-}) {
+// TabButton 컴포넌트는 기존과 동일하되 가독성을 위해 하단 유지
+function TabButton({ label, icon, active, disabled, badge, onClick }: any) {
   return (
     <button
       disabled={disabled}
       onClick={onClick}
       className={`
         relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors whitespace-nowrap
-        ${
-        active
-          ? "bg-accent text-white"
-          : "text-text-primary-light dark:text-text-primary-dark hover:bg-accent-soft"
-      }
+        ${active ? "bg-accent text-white" : "text-text-primary-light dark:text-text-primary-dark hover:bg-accent-soft"}
         disabled:opacity-40 disabled:cursor-not-allowed
       `}
     >
       {icon}
       <span className="hidden sm:inline">{label}</span>
-
       {badge && (
         <span className="absolute -top-1 -right-1 px-1.5 py-0.5 text-[10px] font-semibold rounded bg-yellow-500 text-white">
           {badge}

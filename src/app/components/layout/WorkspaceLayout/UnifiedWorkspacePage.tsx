@@ -18,9 +18,9 @@ import Button from "@/app/components/ui/button/Button";
 import Checkbox from "@/app/components/ui/form/Checkbox";
 import FileUploadButton from "@/app/components/files/FileUploadButton";
 
-import WorkspaceGridItem from "@/app/components/layout/WorkspaceLayout/WorkspaceGridItem";
-import WorkspaceListItem from "@/app/components/layout/WorkspaceLayout/WorkspaceListItem";
-import UnifiedPanel from "@/app/components/layout/WorkspaceLayout/panel/UnifiedPanel";
+import WorkspaceGridItem from "@/app/components/layout/WorkspaceLayout/workspace/WorkspaceGridItem";
+import WorkspaceListItem from "@/app/components/layout/WorkspaceLayout/workspace/WorkspaceListItem";
+import UnifiedPanel from "@/app/components/layout/WorkspaceLayout/workspace/panel/UnifiedPanel";
 import Pagination from "@/app/components/ui/pagination/Pagination";
 import { NoteListItem } from "@/lib/graphql/note/note.type";
 

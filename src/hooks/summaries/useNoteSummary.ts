@@ -1,11 +1,11 @@
-// hooks/summaries/useDocumentSummary.ts
+// hooks/summaries/useNoteSummary.ts
 "use client";
 
 import {
-  DOCUMENT_SUMMARY_QUERY,
+  NOTE_SUMMARY_QUERY,
 } from "@/lib/graphql/summary/summary.query";
 import {
-  DocumentSummaryQueryResult,
+  NoteSummaryQueryResult,
 } from "@/lib/graphql/summary/summary.type";
 import {useQuery} from "@apollo/client/react";
 
@@ -13,22 +13,22 @@ interface Options {
   enabled?: boolean;
 }
 
-export function useDocumentSummary(
-  fileId: number,
+export function useNoteSummary(
+  noteId: number,
   options?: Options
 ) {
   const { data, loading, refetch } =
-    useQuery<DocumentSummaryQueryResult>(
-      DOCUMENT_SUMMARY_QUERY,
+    useQuery<NoteSummaryQueryResult>(
+      NOTE_SUMMARY_QUERY,
       {
-        variables: { fileId },
-        skip: options?.enabled === false || !fileId,
+        variables: { noteId },
+        skip: options?.enabled === false || !noteId,
         fetchPolicy: "network-only",
       }
     );
 
   return {
-    summary: data?.documentSummaryByFileId ?? null,
+    summary: data?.noteSummaryByNoteId ?? null,
     loading,
     refetch,
   };

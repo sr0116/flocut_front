@@ -13,7 +13,7 @@ export default function DocumentsPage() {
     const router = useRouter();
     const {sessionId} = useParams<{ sessionId: string }>();
 
-    // 🔥 서버 페이징을 위한 상태 (0-based)
+    //  서버 페이징을 위한 상태 (0-based)
     const [currentPage, setCurrentPage] = useState(0);
     const itemsPerPage = 20;
 
