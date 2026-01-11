@@ -18,6 +18,7 @@ export const createNoteFromSummary = (payload: {
 }) =>
   api.post<number>("/api/notes/from-summary", payload);
 
+
 // //  노트 요약 요청 ->summary 쪽으로 이동
 // export const requestNoteSummary = (noteId: number) =>
 //   api.post<{ summaryId: number }>(`/api/notes/${noteId}/summary`);

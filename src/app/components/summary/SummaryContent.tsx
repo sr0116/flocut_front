@@ -1,10 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Loader2, Sparkles } from "lucide-react";
+
 import { SummaryStatus } from "@/lib/graphql/summary/summary.type";
 import { useSummaryView } from "@/hooks/summaries/useSummaryView";
+
 import SummaryRequestButton from "@/app/components/shared/SummaryRequestButton";
+import SummaryActions from "./SummaryActions";
+import { SummaryStatusBadge } from "./SummaryStatusBadge";
 
 type SummaryHistoryItem = {
   summaryId: number;
@@ -17,10 +21,13 @@ type Props = {
   type: "document" | "note";
   targetId: number;
   sessionId: number;
+
   history: SummaryHistoryItem[];
   loadingHistory: boolean;
+
   onRequestSuccess: () => void;
 };
+
 
 export default function SummaryContent({
                                          type,
@@ -34,20 +41,24 @@ export default function SummaryContent({
     null
   );
 
+
   const selectedHistoryItem = history.find(
     (h) => h.summaryId === selectedSummaryId
   );
 
-  const { summary: detail, loading: loadingDetail } =
-    useSummaryView(selectedSummaryId ?? undefined);
+  const {
+    summary: detail,
+    loading: loadingDetail,
+  } = useSummaryView(selectedSummaryId ?? undefined);
 
-  // 최신 요약 자동 선택
+
   useEffect(() => {
     if (!selectedSummaryId && history.length > 0) {
       setSelectedSummaryId(history[0].summaryId);
     }
   }, [history, selectedSummaryId]);
-  //  로딩
+
+
   if (loadingHistory) {
     return (
       <div className="flex justify-center py-20">
@@ -56,10 +67,11 @@ export default function SummaryContent({
     );
   }
 
-  // 요약 없음
+
   if (history.length === 0) {
     return (
       <div className="p-6 space-y-6">
+        {/* 헤더 */}
         <div className="flex items-center justify-between border-b pb-4">
           <div className="flex items-center gap-2">
             <Sparkles size={20} className="text-accent" />
@@ -74,9 +86,10 @@ export default function SummaryContent({
           />
         </div>
 
+        {/* 빈 상태 */}
         <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed rounded-3xl">
           <Sparkles size={48} className="text-accent opacity-20 mb-4" />
-          <p className="text-sm text-text-muted-light text-center">
+          <p className="text-sm text-text-muted-light">
             아직 생성된 요약이 없습니다
           </p>
         </div>
@@ -84,13 +97,14 @@ export default function SummaryContent({
     );
   }
 
-  //  요약 있을 때
+
   return (
     <div className="flex h-full">
-      {/* === 좌측: 요약 히스토리 === */}
-      <aside className="w-64 border-r p-4 space-y-2">
-        <div className="flex items-center justify-between mb-2">
+
+      <aside className="w-64 border-r border-border-light p-4 space-y-2">
+        <div className="flex items-center justify-between mb-3">
           <h5 className="font-bold text-sm">요약 내역</h5>
+
           <SummaryRequestButton
             type={type}
             targetId={targetId}
@@ -100,30 +114,37 @@ export default function SummaryContent({
           />
         </div>
 
-        {history.map((item) => (
-          <button
-            key={item.summaryId}
-            onClick={() => setSelectedSummaryId(item.summaryId)}
-            className={`w-full text-left p-3 rounded-lg border text-sm space-y-1
-              ${
-              selectedSummaryId === item.summaryId
-                ? "border-accent bg-accent-soft"
-                : "hover:bg-surface-light"
-            }
-            `}
-          >
-            <div className="flex items-center justify-between">
-              <span>v{item.versionNo}</span>
-              <StatusBadge status={item.status} />
-            </div>
-            <p className="text-xs text-text-muted-light">
-              {new Date(item.createdAt).toLocaleString()}
-            </p>
-          </button>
-        ))}
+        {history.map((item) => {
+          const selected = selectedSummaryId === item.summaryId;
+
+          return (
+            <button
+              key={item.summaryId}
+              onClick={() => setSelectedSummaryId(item.summaryId)}
+              className={`
+                w-full text-left p-3 rounded-lg border text-sm space-y-1
+                transition-colors
+                ${
+                selected
+                  ? "border-accent bg-accent-soft"
+                  : "border-border-light hover:bg-surface-light"
+              }
+              `}
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-medium">v{item.versionNo}</span>
+                <SummaryStatusBadge status={item.status} />
+              </div>
+
+              <p className="text-xs text-text-muted-light">
+                {new Date(item.createdAt).toLocaleString("ko-KR")}
+              </p>
+            </button>
+          );
+        })}
       </aside>
 
-      {/* === 우측: 요약 상세 === */}
+
       <section className="flex-1 p-6 overflow-y-auto">
         {loadingDetail ? (
           <div className="flex justify-center py-20">
@@ -134,34 +155,29 @@ export default function SummaryContent({
             왼쪽에서 요약을 선택하세요
           </p>
         ) : (
-          <div className="space-y-4">
-            <h4 className="font-bold text-lg">
-              요약 상세 (v{selectedHistoryItem?.versionNo})
-            </h4>
+          <div className="space-y-6">
+            {/* 헤더 */}
+            <div className="flex items-center justify-between">
+              <h4 className="font-bold text-lg">
+                요약 상세 (v{selectedHistoryItem?.versionNo})
+              </h4>
 
-            <p className="whitespace-pre-wrap text-sm leading-relaxed">
-              {detail.finalDocument}
-            </p>
+              {/* 요약 → 노트 생성 액션 */}
+              <SummaryActions
+                summaryId={detail.summaryId}
+                sessionId={sessionId}
+              />
+            </div>
+
+            {/* 본문 */}
+            <div className="border border-border-light rounded-2xl p-6 bg-surface-light">
+              <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                {detail.finalDocument}
+              </p>
+            </div>
           </div>
         )}
       </section>
     </div>
-  );
-}
-
-//  나중에 공용 컴포너트로 사용 예정
-function StatusBadge({ status }: { status: SummaryStatus }) {
-  const map = {
-    REQUESTED: "bg-yellow-100 text-yellow-700",
-    COMPLETED: "bg-green-100 text-green-700",
-    FAILED: "bg-red-100 text-red-700",
-  };
-
-  return (
-    <span
-      className={`px-2 py-0.5 rounded text-[11px] font-semibold ${map[status]}`}
-    >
-      {status}
-    </span>
   );
 }
