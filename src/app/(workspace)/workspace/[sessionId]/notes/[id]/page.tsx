@@ -1,3 +1,4 @@
+// src/app/(workspace)/workspace/[sessionId]/notes/[id]/page.tsx
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
@@ -21,7 +22,6 @@ export default function NoteDetailPage() {
         isNew ? undefined : Number(id)
     );
 
-    // 중복 생성 방지용 ref
     const creatingRef = useRef(false);
 
     const { handleCreate, isCreating } = useNoteCreate(Number(sessionId));
@@ -39,14 +39,12 @@ export default function NoteDetailPage() {
         stats,
     } = useNoteEditor(noteId);
 
-    // 저장 안 된 상태에서 페이지 이탈 방지 가드
     const { confirmNavigation } = useUnsavedLeaveGuard(
         !saved && !isSaving,
         handleSync
     );
 
     useEffect(() => {
-        // new 상태에서 한 번만 생성
         if (!isNew || isCreating || noteId || creatingRef.current) return;
 
         creatingRef.current = true;
@@ -57,7 +55,6 @@ export default function NoteDetailPage() {
         });
     }, [isNew, isCreating, noteId, handleCreate, sessionId, router]);
 
-    // 뒤로가기 버튼 클릭 시 가드 적용
     const handleBackClick = () => {
         confirmNavigation(() => {
             router.push(`/workspace/${sessionId}/notes`);
@@ -66,30 +63,31 @@ export default function NoteDetailPage() {
 
     if (loading || isCreating) {
         return (
-            <div className="h-screen flex items-center justify-center bg-white dark:bg-slate-950">
-                <Loader2 className="animate-spin text-pink-500" size={48} />
+            <div className="h-screen flex items-center justify-center bg-white dark:bg-surface-dark">
+                <Loader2 className="animate-spin text-accent" size={48} />
             </div>
         );
     }
 
     return (
-        <div className="h-screen flex flex-col bg-white dark:bg-slate-950">
-            <div className="h-14 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 sm:px-6 flex-shrink-0">
+        <div className="h-screen flex flex-col bg-white dark:bg-surface-dark">
+            {/* Header */}
+            <div className="h-14 border-b border-border-light dark:border-border-dark flex items-center justify-between px-4 sm:px-6 flex-shrink-0">
                 <div className="flex items-center gap-3">
                     <button
                         onClick={handleBackClick}
-                        className="p-2 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg transition-colors"
+                        className="p-2 hover:bg-accent-soft rounded-lg transition-colors"
                     >
                         <ArrowLeft size={18} />
                     </button>
-                    <div className="text-xs text-slate-500 dark:text-slate-400">
+                    <div className="text-xs text-text-muted-light dark:text-text-muted-dark">
                         {stats.charCount}자 · {stats.wordCount}단어
                     </div>
                 </div>
 
                 <div className="flex items-center gap-3">
                     {isSaving ? (
-                        <div className="flex items-center gap-2 text-sm text-pink-500">
+                        <div className="flex items-center gap-2 text-sm text-accent">
                             <Loader2 size={14} className="animate-spin" />
                             <span>저장 중...</span>
                         </div>
@@ -98,7 +96,7 @@ export default function NoteDetailPage() {
                     ) : (
                         <button
                             onClick={handleSync}
-                            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg bg-gradient-to-r from-pink-500 to-violet-500 text-white hover:shadow-lg transition-all"
+                            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg bg-accent text-white hover:bg-accent-hover transition-all"
                         >
                             <Save size={14} />
                             저장
@@ -109,6 +107,7 @@ export default function NoteDetailPage() {
 
             <FullPageToolbar editor={editor} />
 
+            {/* Editor */}
             <div className="flex-1 overflow-y-auto px-6 sm:px-12 py-8">
                 <div className="max-w-4xl mx-auto">
                     <NoteTitleInput

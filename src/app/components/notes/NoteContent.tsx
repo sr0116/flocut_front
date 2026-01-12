@@ -23,7 +23,7 @@ type Props = {
     onSaveStatusChange?: (saved: boolean, saving: boolean) => void;
     onStatsChange?: (chars: number, words: number) => void;
     onTitleChange?: (title: string) => void;
-    onContentChange?: (content: string) => void; //  추가
+    onContentChange?: (content: string) => void;
     onSyncReady?: (fn: () => Promise<void>) => void;
 };
 
@@ -34,7 +34,7 @@ function NoteContent({
                          onSaveStatusChange,
                          onStatsChange,
                          onTitleChange,
-                         onContentChange, //  추가
+                         onContentChange,
                          onSyncReady,
                      }: Props) {
     const router = useRouter();
@@ -81,7 +81,6 @@ function NoteContent({
         onTitleChange?.(localTitle);
     }, [localTitle, onTitleChange]);
 
-    //  에디터 내용 변경 시 상위로 전달
     useEffect(() => {
         if (editor) {
             const text = editor.getText();
@@ -101,25 +100,12 @@ function NoteContent({
                 { scroll: false }
             );
         });
-    }, [
-        isNew,
-        isCreating,
-        noteId,
-        handleCreate,
-        onCreated,
-        sessionId,
-        router,
-    ]);
+    }, [isNew, isCreating, noteId, handleCreate, onCreated, sessionId, router]);
 
     const handleTranscriptReady = (text: string) => {
         if (!editor || !text.trim()) return;
 
-        editor
-            .chain()
-            .focus()
-            .insertContent(`\n\n${text}`)
-            .run();
-
+        editor.chain().focus().insertContent(`\n\n${text}`).run();
         handleContentChange(editor.getHTML());
         refetch?.();
     };
@@ -149,7 +135,7 @@ function NoteContent({
     return (
         <div className="h-full flex flex-col overflow-hidden">
             {/* 상단 툴바 */}
-            <div className="flex-shrink-0 flex items-center gap-2 px-4 py-2 border-b">
+            <div className="flex-shrink-0 flex items-center gap-2 px-4 py-2 border-b border-border-light dark:border-border-dark">
                 {noteId && (
                     <>
                         <IconButton
@@ -178,12 +164,14 @@ function NoteContent({
                     onChange={handleTitleChange}
                     placeholder="제목 없음"
                 />
+
+                {/* showMobileToolbar={true} */}
                 <NoteContentEditor
                     content={localContent}
                     onChange={handleContentChange}
                     onEditorReady={setEditor}
                     editable
-                    showMobileToolbar
+                    showMobileToolbar={true}
                 />
             </div>
 

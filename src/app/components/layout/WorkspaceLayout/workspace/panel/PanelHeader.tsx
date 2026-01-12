@@ -1,7 +1,4 @@
-
 "use client";
-
-
 
 import TabBar from "@/app/components/notes/download/TabBar";
 import HeaderActions from "@/app/components/notes/header/HeaderActions";
@@ -21,6 +18,7 @@ type Props = {
     title?: string;
     content?: string;
     htmlContent?: string;
+    isMobile?: boolean;
 };
 
 export default function PanelHeader({
@@ -36,6 +34,7 @@ export default function PanelHeader({
                                         title = "제목 없음",
                                         content = "",
                                         htmlContent,
+                                        isMobile = false,
                                     }: Props) {
     return (
         <div className="flex items-center justify-between px-4 py-3 border-b border-border-light dark:border-border-dark bg-white dark:bg-surface-dark">
@@ -52,6 +51,7 @@ export default function PanelHeader({
                 title={title}
                 content={content}
                 htmlContent={htmlContent}
+                isMobile={isMobile}
             />
         </div>
     );
