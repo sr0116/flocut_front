@@ -33,7 +33,7 @@ export default function WorkspaceLayout({
 
     const authCheckedRef = useRef(false);
 
-     //  인증
+    /** ================= 인증 ================= */
     useEffect(() => {
         if (authCheckedRef.current) return;
         authCheckedRef.current = true;
@@ -47,7 +47,7 @@ export default function WorkspaceLayout({
         }
     }, [initialized, loading, user, pathname, router]);
 
-
+    /** ================= 반응형 네비 ================= */
     useEffect(() => {
         if (isMobile) {
             setNavMode("hidden");
@@ -60,13 +60,16 @@ export default function WorkspaceLayout({
 
     if (!initialized || loading || !user) return null;
 
+    /** ================= 모달 라우트 판별 ================= */
+    const isModalRoute = pathname.startsWith("/settings");
 
+    /** GlobalNav에는 hidden을 넘기지 않는다 */
     const navViewMode: "full" | "icon" =
         navMode === "icon" ? "icon" : "full";
 
     return (
         <div className="h-screen flex flex-col bg-background-light dark:bg-background-dark">
-            {/* Header */}
+            {/* ================= Header ================= */}
             <WorkspaceHeader
                 onMenuClick={() => {
                     // 모바일: hidden → full
@@ -76,24 +79,31 @@ export default function WorkspaceLayout({
             />
 
             <div className="flex flex-1 min-h-0 relative">
-                {/* ================= Overlay (모바일 + 네비 열렸을 때만) ================= */}
+                {/* ================= 모바일 네비 overlay (투명) ================= */}
                 {isMobile && navMode === "full" && (
                     <div
-                        className="
-              fixed inset-0 top-14 z-40
-              bg-transparent
-            "
+                        className="fixed inset-0 top-14 z-40 bg-transparent"
                         onClick={() => setNavMode("hidden")}
                     />
                 )}
 
                 {/* ================= GlobalNav ================= */}
                 {navMode !== "hidden" && (
-                    <div className="relative z-50 flex-shrink-0">
+                    <div
+                        className={`
+              relative flex-shrink-0
+              ${
+                            isModalRoute
+                                ? "pointer-events-none opacity-60"
+                                : "z-50"
+                        }
+            `}
+                    >
                         <GlobalNav
                             mode={navViewMode}
                             selectedSessionId={selectedSessionId}
                             onSessionSelect={(id) => {
+                                if (isModalRoute) return; //  모달일 땐 완전 차단
                                 setSelectedSessionId(id);
                                 if (isMobile) setNavMode("hidden");
                             }}
