@@ -37,7 +37,7 @@ export default function TiptapEditor({
                                      }: TiptapEditorProps) {
     const [isMounted, setIsMounted] = useState(false);
 
-    // ✅ 반응형 감지
+    // 반응형 감지
     const isMobile = useMediaQuery("(max-width: 768px)");
 
     useEffect(() => {
@@ -142,7 +142,7 @@ export default function TiptapEditor({
             {editable && <BubbleMenuToolbar editor={editor} />}
             <EditorContent editor={editor} />
 
-            {/* ✅ 모바일에서만 하단 툴바 표시 */}
+            {/*  모바일에서만 하단 툴바 표시 */}
             {editable && showMobileToolbar && isMobile && (
                 <MobileBottomToolbar editor={editor} />
             )}

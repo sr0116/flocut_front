@@ -1,248 +1,186 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import { useMemo, useState, useCallback, useEffect } from "react";
-import { toast } from "sonner";
+import { useState, useEffect, useCallback } from "react";
+import SummaryContent from "@/app/components/summary/SummaryContent";
+import {FileText} from "lucide-react";
+import WorkspaceListItem from "@/app/components/layout/WorkspaceLayout/workspace/WorkspaceListItem";
 
-import ResizablePanelLayout from "../ResizablePanelLayout";
-import WorkspaceContent from "./WorkspaceContent";
-import WorkspacePanel from "./WorkspacePanel";
-import WorkspaceHeaderBar from "./WorkspaceHeaderBar";
+type WorkspaceItem = {
+  id: string;
+  type: "note" | "document" | "audio";
+  title: string;
+  date: string;
+  noteId?: number;
+};
 
-import { useWorkspaceQuery } from "@/hooks/workspace/useWorkspaceQuery";
-import { useWorkspaceRouting } from "@/hooks/workspace/useWorkspaceRouting";
-import { useWorkspaceSelection } from "@/hooks/workspace/useWorkspaceSelection";
-import {
-    WorkspaceItem,
-    WorkspaceFilter,
-    SortBy,
-    ViewMode,
-} from "@/hooks/workspace/workspace";
-import { useNoteAction } from "@/hooks/notes/useNoteAction";
+export default function WorkspacePage({ params }: { params: { sessionId: string } }) {
+  const sessionId = Number(params.sessionId);
 
-export default function WorkspacePage() {
-    const { sessionId } = useParams<{ sessionId: string }>();
+  // 상태 관리
+  const [notes, setNotes] = useState<WorkspaceItem[]>([]);
+  const [documents, setDocuments] = useState<WorkspaceItem[]>([]);
+  const [selectedNote, setSelectedNote] = useState<WorkspaceItem | null>(null);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-    // 상태
-    const [filter, setFilter] = useState<WorkspaceFilter>("all");
-    const [searchQuery, setSearchQuery] = useState("");
-    const [sortBy, setSortBy] = useState<SortBy>("recent");
-    const [viewMode, setViewMode] = useState<ViewMode>("list");
-    const [clientPage, setClientPage] = useState(0);
+  // 노트 리스트 가져오기 함수
+  const fetchNotes = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      const response = await fetch(`/api/sessions/${sessionId}/notes`);
+      if (!response.ok) throw new Error("Failed to fetch notes");
 
-    const {
-        allNotes,
-        files,
-        loading,
-        refetchNotes,
-        refetchFiles,
-        forceRefetch,
-    } = useWorkspaceQuery(sortBy);
+      const data = await response.json();
 
-    const {
-        selectedItems,
-        toggleSelectItem,
-        clearSelection,
-    } = useWorkspaceSelection();
+      const transformedNotes: WorkspaceItem[] = data.notes.map((note: any) => ({
+        id: `note-${note.noteId}`,
+        type: "note",
+        title: note.title,
+        date: new Date(note.createdAt).toLocaleDateString("ko-KR"),
+        noteId: note.noteId,
+      }));
 
-    const {
-        selectedId,
-        selectedType,
-        openItem,
-        closePanel,
-        openNewNote,
-    } = useWorkspaceRouting();
+      setNotes(transformedNotes);
+    } catch (error) {
+      console.error("노트 로딩 실패:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [sessionId]);
 
-    const { handleSoftDelete } = useNoteAction();
+  // 문서 리스트 가져오기 함수 (필요시)
+  const fetchDocuments = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/sessions/${sessionId}/documents`);
+      if (!response.ok) throw new Error("Failed to fetch documents");
 
-    //  전체 아이템 목록 생성 + 필터링 + 검색 + 정렬
-    const allItems: WorkspaceItem[] = useMemo(() => {
-        // 1. 병합 (전체 데이터)
-        const merged: WorkspaceItem[] = [
-            ...allNotes.map((n) => ({
-                id: `note-${n.noteId}`,
-                type: "note" as const,
-                title: n.title ?? "제목 없음",
-                date: n.moddate ?? n.regdate ?? "",
-                regdate: n.regdate ?? "",
-                moddate: n.moddate ?? "",
-                noteId: n.noteId,
-            })),
-            ...files.map((f) => ({
-                id: `document-${f.fileId}`,
-                type: "document" as const,
-                title: f.fileName,
-                date: f.regdate ?? "",
-                regdate: f.regdate ?? "",
-                moddate: f.regdate ?? "",
-                fileId: f.fileId,
-            })),
-        ];
+      const data = await response.json();
 
-        // 2. 타입 필터
-        const filtered =
-            filter === "all"
-                ? merged
-                : merged.filter((i) => i.type === filter);
+      const transformedDocs: WorkspaceItem[] = data.documents.map((doc: any) => ({
+        id: `document-${doc.documentId}`,
+        type: "document",
+        title: doc.title,
+        date: new Date(doc.createdAt).toLocaleDateString("ko-KR"),
+        noteId: doc.documentId,
+      }));
 
-        // 3. 검색 필터
-        const searched = searchQuery.trim()
-            ? filtered.filter((item) =>
-                item.title
-                    .toLowerCase()
-                    .includes(searchQuery.toLowerCase().trim())
-            )
-            : filtered;
+      setDocuments(transformedDocs);
+    } catch (error) {
+      console.error("문서 로딩 실패:", error);
+    }
+  }, [sessionId]);
 
-        // 4. 정렬
-        const sorted = [...searched].sort((a, b) => {
-            if (sortBy === "title") {
-                return a.title.localeCompare(b.title, "ko-KR");
-            }
+  // 초기 로드
+  useEffect(() => {
+    fetchNotes();
+    fetchDocuments();
+  }, [fetchNotes, fetchDocuments]);
 
-            if (sortBy === "created") {
-                const dateA = new Date(a.regdate || a.date).getTime();
-                const dateB = new Date(b.regdate || b.date).getTime();
-                return dateB - dateA;
-            }
+  //  노트 생성 성공 시 콜백
+  const handleNoteCreated = useCallback(() => {
+    console.log(" 노트가 생성되었습니다! 리스트를 새로고침합니다.");
+    fetchNotes(); // 리스트 다시 가져오기
+  }, [fetchNotes]);
 
-            // recent
-            const dateA = new Date(a.moddate || a.regdate || a.date).getTime();
-            const dateB = new Date(b.moddate || b.regdate || b.date).getTime();
-            return dateB - dateA;
-        });
+  // 삭제 후 콜백
+  const handleDeleted = useCallback(() => {
+    console.log(" 노트가 삭제되었습니다! 리스트를 새로고침합니다.");
+    fetchNotes();
+  }, [fetchNotes]);
 
-        return sorted;
-    }, [allNotes, files, filter, searchQuery, sortBy]);
-
-    // 클라이언트 페이지네이션
-    const pageSize = 20;
-    const totalPages = Math.ceil(allItems.length / pageSize);
-    const startIdx = clientPage * pageSize;
-    const pagedItems = allItems.slice(startIdx, startIdx + pageSize);
-
-    const pageData = {
-        pageNumber: clientPage,
-        totalPages,
-        totalElements: allItems.length,
-        hasNext: clientPage < totalPages - 1,
-        hasPrevious: clientPage > 0,
-        isFirst: clientPage === 0,
-        isLast: clientPage === totalPages - 1,
-    };
-
-    // 정렬 변경 시 페이지 리셋
-    useEffect(() => {
-        setClientPage(0);
-    }, [sortBy, filter, searchQuery]);
-
-    // 노트 생성 완료 핸들러
-    const handleNoteCreated = useCallback(
-        async (noteId: number) => {
-            console.log("[WorkspacePage] 새 노트 생성됨:", noteId);
-            await forceRefetch();
-            setClientPage(0);
-        },
-        [forceRefetch]
+  // 아이템 선택
+  const handleToggleSelect = useCallback((id: string) => {
+    setSelectedItems((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
     );
+  }, []);
 
-    // 노트 업데이트 핸들러
-    const handleNoteUpdated = useCallback(
-        async () => {
-            console.log("[WorkspacePage] 노트 업데이트됨");
-            await refetchNotes();
-        },
-        [refetchNotes]
-    );
+  const handleItemClick = useCallback((item: WorkspaceItem) => {
+    setSelectedNote(item);
+  }, []);
 
-    //  전체 선택
-    const handleSelectAll = useCallback(() => {
-        const allItemIds = pagedItems.map((item) => item.id);
-        allItemIds.forEach((id) => {
-            if (!selectedItems.has(id)) {
-                toggleSelectItem(id);
-            }
-        });
-    }, [pagedItems, selectedItems, toggleSelectItem]);
-
-    //  대량 삭제
-    const handleBulkDelete = useCallback(async () => {
-        if (selectedItems.size === 0) return;
-
-        const confirmed = window.confirm(
-            `${selectedItems.size}개 항목을 휴지통으로 이동하시겠습니까?`
-        );
-
-        if (!confirmed) return;
-
-        try {
-            const selectedNoteIds = allItems
-                .filter((item) => selectedItems.has(item.id) && item.noteId)
-                .map((item) => item.noteId!);
-
-            // 순차 삭제
-            for (const noteId of selectedNoteIds) {
-                await handleSoftDelete(noteId);
-            }
-
-            toast.success(`${selectedNoteIds.length}개 항목이 휴지통으로 이동되었습니다.`);
-            clearSelection();
-            await refetchNotes();
-        } catch (error) {
-            toast.error("삭제 중 오류가 발생했습니다.");
-            console.error(error);
-        }
-    }, [selectedItems, allItems, handleSoftDelete, clearSelection, refetchNotes]);
-
-    return (
-        <ResizablePanelLayout
-            isOpen={!!selectedId}
-            left={(isCompact) => (
-                <div className="flex flex-col h-full min-h-0">
-                    <WorkspaceHeaderBar
-                        filter={filter}
-                        onChangeFilter={setFilter}
-                        selectedCount={selectedItems.size}
-                        onClearSelection={clearSelection}
-                        onSelectAll={handleSelectAll}
-                        onBulkDelete={handleBulkDelete}
-                        totalItems={pagedItems.length}
-                        sessionId={Number(sessionId)}
-                        onUploaded={refetchFiles}
-                        onNewNote={openNewNote}
-                        searchQuery={searchQuery}
-                        onSearchChange={setSearchQuery}
-                        sortBy={sortBy}
-                        onSortChange={setSortBy}
-                        viewMode={viewMode}
-                        onViewModeChange={setViewMode}
-                    />
-
-                    <WorkspaceContent
-                        compact={isCompact}
-                        loading={loading}
-                        items={pagedItems}
-                        selectedItems={selectedItems}
-                        onToggleSelect={toggleSelectItem}
-                        onItemClick={(item) =>
-                            openItem(item.type, item.noteId ?? item.fileId!)
-                        }
-                        notePageData={pageData}
-                        onPageChange={setClientPage}
-                        onDeleted={handleNoteUpdated}
-                        viewMode={viewMode}
-                    />
-                </div>
+  return (
+    <div className="flex h-screen">
+      {/* 왼쪽: 리스트 영역 */}
+      <div className="w-1/3 border-r border-border-light dark:border-border-dark overflow-y-auto p-4 space-y-2">
+        {/* 노트 섹션 */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-text-primary-light dark:text-text-primary-dark">
+              노트
+            </h2>
+            {isRefreshing && (
+              <div className="text-xs text-accent animate-pulse">
+                새로고침 중...
+              </div>
             )}
-            right={
-                <WorkspacePanel
-                    selectedId={selectedId}
-                    selectedType={selectedType}
-                    onClose={closePanel}
-                    onCreated={handleNoteCreated}
-                    onUpdated={handleNoteUpdated}
-                />
-            }
-        />
-    );
+          </div>
+
+          {notes.length === 0 ? (
+            <p className="text-sm text-text-muted-light dark:text-text-muted-dark text-center py-8">
+              노트가 없습니다
+            </p>
+          ) : (
+            notes.map((note) => (
+              <WorkspaceListItem
+                key={note.id}
+                item={note}
+                selected={selectedItems.includes(note.id)}
+                compact={false}
+                onToggleSelect={() => handleToggleSelect(note.id)}
+                onClick={() => handleItemClick(note)}
+                onDeleted={handleDeleted} // 삭제 후 리스트 갱신
+              />
+            ))
+          )}
+        </div>
+
+        {/* 문서 섹션 */}
+        <div>
+          <h2 className="text-lg font-bold text-text-primary-light dark:text-text-primary-dark mb-4">
+            문서
+          </h2>
+          {documents.length === 0 ? (
+            <p className="text-sm text-text-muted-light dark:text-text-muted-dark text-center py-8">
+              문서가 없습니다
+            </p>
+          ) : (
+            documents.map((doc) => (
+              <WorkspaceListItem
+                key={doc.id}
+                item={doc}
+                selected={selectedItems.includes(doc.id)}
+                compact={false}
+                onToggleSelect={() => handleToggleSelect(doc.id)}
+                onClick={() => handleItemClick(doc)}
+                onDeleted={handleDeleted}
+              />
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* 오른쪽: 상세 & 요약 영역 */}
+      <div className="flex-1 overflow-y-auto bg-surface-light dark:bg-surface-dark">
+        {selectedNote ? (
+          <SummaryContent
+            type={selectedNote.type as "note" | "document"}
+            targetId={selectedNote.noteId || 0}
+            sessionId={sessionId}
+            history={[]} // 실제 요약 히스토리 데이터로 교체하세요
+            loadingHistory={false}
+            onRequestSuccess={fetchNotes} // 요약 요청 성공 시에도 리스트 갱신
+            onNoteCreated={handleNoteCreated} // 노트 생성 시 리스트 갱신
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full text-text-muted-light dark:text-text-muted-dark">
+            <div className="text-center space-y-2">
+              <FileText size={48} className="mx-auto opacity-20" />
+              <p>노트나 문서를 선택하세요</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
