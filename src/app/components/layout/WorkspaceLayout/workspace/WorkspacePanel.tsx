@@ -14,13 +14,15 @@ type Props = {
     selectedId: string | null;
     selectedType: "note" | "document" | "audio" | null;
     onClose: () => void;
-    onUpdated: (payload: UpdatedPayload) => void;
+    onCreated?: (noteId: number) => void;
+    onUpdated: () => void;
 };
 
 export default function WorkspacePanel({
                                            selectedId,
                                            selectedType,
                                            onClose,
+                                           onCreated,
                                            onUpdated,
                                        }: Props) {
     const { sessionId } = useParams<{ sessionId: string }>();
@@ -30,18 +32,14 @@ export default function WorkspacePanel({
 
     if (!selectedId || !selectedType) return null;
 
-    const handleUpdated = (payload: UpdatedPayload) => {
-        console.log("[WorkspacePanel] UnifiedPanel 데이터를 Page로 전달:", payload);
-        onUpdated(payload);
-    };
-
     return (
         <UnifiedPanel
             type={selectedType}
             id={selectedId}
             sessionId={Number(sessionId)}
             onClose={onClose}
-            onUpdated={handleUpdated}
+            onCreated={onCreated}
+            onUpdated={onUpdated}
             isMobile={isMobile || isTablet}
         />
     );

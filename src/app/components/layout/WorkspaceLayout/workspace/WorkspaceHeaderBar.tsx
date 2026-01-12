@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Button from "@/app/components/ui/button/Button";
 import FileUploadButton from "@/app/components/files/FileUploadButton";
 import {
@@ -8,8 +9,18 @@ import {
     FileText,
     File,
     Mic,
+    Search,
+    X,
+    SlidersHorizontal,
+    LayoutGrid,
+    List as ListIcon,
+    ChevronDown,
+    Trash2,
+    Download,
+    Archive,
+    CheckSquare,
 } from "lucide-react";
-import { WorkspaceFilter } from "@/hooks/workspace/workspace";
+import { WorkspaceFilter, SortBy, ViewMode } from "@/hooks/workspace/workspace";
 import { useMediaQuery } from "@/hooks/common/useMediaQuery";
 
 type Props = {
@@ -17,10 +28,20 @@ type Props = {
     onChangeFilter: (f: WorkspaceFilter) => void;
     selectedCount: number;
     onClearSelection: () => void;
+    onSelectAll: () => void;
+    onBulkDelete: () => void;
+    totalItems: number;
 
     sessionId: number;
     onUploaded: () => void;
     onNewNote: () => void;
+
+    searchQuery: string;
+    onSearchChange: (query: string) => void;
+    sortBy: SortBy;
+    onSortChange: (sort: SortBy) => void;
+    viewMode: ViewMode;
+    onViewModeChange: (mode: ViewMode) => void;
 };
 
 export default function WorkspaceHeaderBar({
@@ -28,12 +49,22 @@ export default function WorkspaceHeaderBar({
                                                onChangeFilter,
                                                selectedCount,
                                                onClearSelection,
+                                               onSelectAll,
+                                               onBulkDelete,
+                                               totalItems,
                                                sessionId,
                                                onUploaded,
                                                onNewNote,
+                                               searchQuery,
+                                               onSearchChange,
+                                               sortBy,
+                                               onSortChange,
+                                               viewMode,
+                                               onViewModeChange,
                                            }: Props) {
-    /** 반응형 기준 (패널 좁아질 때) */
-    const isCompact = useMediaQuery("(max-width: 900px)");
+    const isMobile = useMediaQuery("(max-width: 640px)");
+    const isTablet = useMediaQuery("(max-width: 900px)");
+    const [showSortDropdown, setShowSortDropdown] = useState(false);
 
     const filters: {
         key: WorkspaceFilter;
@@ -46,68 +77,302 @@ export default function WorkspaceHeaderBar({
         { key: "audio", label: "음성", icon: <Mic size={16} /> },
     ];
 
-    return (
-        <div className="bg-white dark:bg-surface-dark border-b">
-            <div className="px-4 lg:px-8 py-4 flex justify-between items-center gap-2">
-                {/*  필터 */}
-                <div className="flex gap-1 overflow-x-auto scrollbar-hide">
-                    {filters.map(({ key, label, icon }) => (
-                        <button
-                            key={key}
-                            onClick={() => onChangeFilter(key)}
-                            aria-label={label}
-                            title={label}
-                            className={`
-                flex items-center gap-1.5
-                ${isCompact ? "w-9 h-9 justify-center" : "px-4 py-1.5"}
-                rounded-lg text-sm font-semibold
-                transition-colors whitespace-nowrap
-                ${
-                                filter === key
-                                    ? "bg-accent text-white"
-                                    : "text-text-muted-light hover:bg-accent-soft"
-                            }
-              `}
-                        >
-                            {icon}
-                            {!isCompact && <span>{label}</span>}
-                        </button>
-                    ))}
-                </div>
+    const sortOptions = [
+        { value: "recent" as const, label: "최근 수정순" },
+        { value: "created" as const, label: "최신 생성순" },
+        { value: "title" as const, label: "가나다순" },
+    ];
 
-                {/*  우측 액션 */}
-                <div className="flex items-center gap-2 flex-shrink-0">
-                    {selectedCount > 0 && (
-                        <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={onClearSelection}
-                            aria-label="선택 해제"
-                            title="선택 해제"
-                        >
-                            {!isCompact ? "선택 해제" : "✕"}
-                        </Button>
+    const currentSortLabel =
+        sortOptions.find((opt) => opt.value === sortBy)?.label ?? "정렬";
+
+    const allSelected = selectedCount > 0 && selectedCount === totalItems;
+
+    return (
+        <div className="bg-white dark:bg-surface-dark">
+            {/*  선택 모드 바 */}
+            {selectedCount > 0 && (
+                <div className="px-4 lg:px-6 py-3 bg-accent-soft border-b border-accent/20">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <span className="text-sm font-medium text-accent">
+                                {selectedCount}개 선택됨
+                            </span>
+                            <button
+                                onClick={allSelected ? onClearSelection : onSelectAll}
+                                className="text-xs text-accent hover:underline"
+                            >
+                                {allSelected ? "선택 해제" : "전체 선택"}
+                            </button>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            {/* 대량 작업 버튼 */}
+                            <Button
+                                size="sm"
+                                variant="secondary"
+                                onClick={onBulkDelete}
+                            >
+                                <Trash2 size={14} />
+                                <span className="hidden sm:inline">휴지통으로 이동</span>
+                            </Button>
+
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={onClearSelection}
+                            >
+                                <X size={14} />
+                                <span className="hidden sm:inline">취소</span>
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 통합된 단일 행 */}
+            <div className="px-4 lg:px-6 py-4">
+                <div className="flex items-center gap-3 flex-wrap">
+                    {/* 좌측: 검색바 */}
+                    <div className="relative flex-1 min-w-[200px] max-w-md">
+                        <Search
+                            size={18}
+                            className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted-light dark:text-text-muted-dark pointer-events-none"
+                        />
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => onSearchChange(e.target.value)}
+                            placeholder="문서, 노트 검색..."
+                            className="
+                                w-full h-10
+                                pl-10 pr-10
+                                rounded-lg
+                                bg-surface-light dark:bg-surface-input
+                                border border-border-light dark:border-white/10
+                                text-sm
+                                text-text-primary-light dark:text-text-primary-dark
+                                placeholder:text-text-muted-light dark:placeholder:text-text-muted-dark
+                                focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent
+                                transition-all
+                            "
+                        />
+                        {searchQuery && (
+                            <button
+                                onClick={() => onSearchChange("")}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted-light hover:text-text-primary-light dark:hover:text-text-primary-dark transition-colors"
+                                aria-label="검색 지우기"
+                            >
+                                <X size={16} />
+                            </button>
+                        )}
+                    </div>
+
+                    {/* 필터 탭 */}
+                    {!isMobile && (
+                        <>
+                            <div className="h-6 w-px bg-border-light dark:bg-border-dark" />
+                            <div className="flex gap-1">
+                                {filters.map(({ key, label, icon }) => (
+                                    <button
+                                        key={key}
+                                        onClick={() => onChangeFilter(key)}
+                                        className={`
+                                            flex items-center gap-1.5
+                                            px-3 py-1.5 h-9
+                                            rounded-lg text-sm font-medium
+                                            transition-all whitespace-nowrap
+                                            ${
+                                            filter === key
+                                                ? "bg-accent text-white shadow-sm"
+                                                : "text-text-muted-light dark:text-text-muted-dark hover:bg-accent-soft dark:hover:bg-accent-soft"
+                                        }
+                                        `}
+                                    >
+                                        {icon}
+                                        <span>{label}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </>
                     )}
 
-                    {/* 업로드: 반응형일 때만 아이콘 */}
-                    <FileUploadButton
-                        sessionId={sessionId}
-                        onUploadComplete={onUploaded}
-                        iconOnly={isCompact}
-                    />
+                    {/* Spacer */}
+                    <div className="flex-1 min-w-0" />
 
-                    {/* 새 노트 */}
-                    <Button
-                        size="sm"
-                        onClick={onNewNote}
-                        aria-label="새 노트"
-                        title="새 노트"
-                    >
-                        <Plus size={16} />
-                        {!isCompact && <span className="ml-1">새 노트</span>}
-                    </Button>
+                    {/* 우측: 액션 */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                        {/*  전체 선택 버튼 */}
+                        {!isMobile && totalItems > 0 && (
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={onSelectAll}
+                                aria-label="전체 선택"
+                                title="전체 선택"
+                            >
+                                <CheckSquare size={16} />
+                            </Button>
+                        )}
+
+                        {/* 정렬 드롭다운 */}
+                        {!isMobile && (
+                            <div className="relative">
+                                <button
+                                    onClick={() => setShowSortDropdown(!showSortDropdown)}
+                                    className="
+                                        flex items-center gap-1.5
+                                        px-3 py-1.5 h-9
+                                        rounded-lg text-sm
+                                        border border-border-light dark:border-border-dark
+                                        text-text-primary-light dark:text-text-primary-dark
+                                        hover:bg-accent-soft dark:hover:bg-accent-soft
+                                        transition-colors
+                                    "
+                                >
+                                    <SlidersHorizontal size={14} />
+                                    <span className="hidden sm:inline">{currentSortLabel}</span>
+                                    <ChevronDown size={14} />
+                                </button>
+
+                                {showSortDropdown && (
+                                    <>
+                                        <div
+                                            className="fixed inset-0 z-10"
+                                            onClick={() => setShowSortDropdown(false)}
+                                        />
+                                        <div className="absolute right-0 top-full mt-1 z-20 min-w-[160px] rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark shadow-lg py-1">
+                                            {sortOptions.map((opt) => (
+                                                <button
+                                                    key={opt.value}
+                                                    onClick={() => {
+                                                        onSortChange(opt.value);
+                                                        setShowSortDropdown(false);
+                                                    }}
+                                                    className={`
+                                                        w-full px-3 py-2 text-left text-sm
+                                                        hover:bg-accent-soft dark:hover:bg-accent-soft
+                                                        transition-colors
+                                                        ${
+                                                        sortBy === opt.value
+                                                            ? "text-accent font-medium"
+                                                            : "text-text-primary-light dark:text-text-primary-dark"
+                                                    }
+                                                    `}
+                                                >
+                                                    {opt.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        )}
+
+                        {/* 뷰모드 토글 */}
+                        {!isMobile && (
+                            <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-surface-light dark:bg-surface-input border border-border-light dark:border-border-dark">
+                                <button
+                                    onClick={() => onViewModeChange("list")}
+                                    className={`
+                                        p-1.5 rounded-md transition-all
+                                        ${
+                                        viewMode === "list"
+                                            ? "bg-white dark:bg-surface-dark text-accent shadow-sm"
+                                            : "text-text-muted-light dark:text-text-muted-dark hover:text-text-primary-light dark:hover:text-text-primary-dark"
+                                    }
+                                    `}
+                                    aria-label="리스트 뷰"
+                                    title="리스트 뷰"
+                                >
+                                    <ListIcon size={16} />
+                                </button>
+                                <button
+                                    onClick={() => onViewModeChange("grid")}
+                                    className={`
+                                        p-1.5 rounded-md transition-all
+                                        ${
+                                        viewMode === "grid"
+                                            ? "bg-white dark:bg-surface-dark text-accent shadow-sm"
+                                            : "text-text-muted-light dark:text-text-muted-dark hover:text-text-primary-light dark:hover:text-text-primary-dark"
+                                    }
+                                    `}
+                                    aria-label="그리드 뷰"
+                                    title="그리드 뷰"
+                                >
+                                    <LayoutGrid size={16} />
+                                </button>
+                            </div>
+                        )}
+
+                        {/* 파일 업로드 */}
+                        <FileUploadButton
+                            sessionId={sessionId}
+                            onUploadComplete={onUploaded}
+                            iconOnly={isTablet}
+                        />
+
+                        {/* 새 노트 */}
+                        <Button
+                            size="sm"
+                            onClick={onNewNote}
+                            aria-label="새 노트"
+                            title="새 노트"
+                        >
+                            <Plus size={16} />
+                            {!isTablet && <span>새 노트</span>}
+                        </Button>
+                    </div>
                 </div>
             </div>
+
+            {/* 모바일: 필터 탭 (두 번째 행) */}
+            {isMobile && (
+                <div className="px-4 pb-3">
+                    <div className="flex gap-1 overflow-x-auto scrollbar-hide">
+                        {filters.map(({ key, label, icon }) => (
+                            <button
+                                key={key}
+                                onClick={() => onChangeFilter(key)}
+                                className={`
+                                    flex items-center gap-1.5
+                                    px-3 py-1.5
+                                    rounded-lg text-sm font-medium
+                                    transition-all whitespace-nowrap
+                                    ${
+                                    filter === key
+                                        ? "bg-accent text-white shadow-sm"
+                                        : "text-text-muted-light dark:text-text-muted-dark hover:bg-accent-soft dark:hover:bg-accent-soft"
+                                }
+                                `}
+                            >
+                                {icon}
+                                <span>{label}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* 활성 필터 칩 (검색어가 있을 때) */}
+            {searchQuery && (
+                <div className="px-4 lg:px-6 pb-3">
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs text-text-muted-light dark:text-text-muted-dark">
+                            검색:
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-accent-soft text-accent text-xs font-medium">
+                            "{searchQuery}"
+                            <button
+                                onClick={() => onSearchChange("")}
+                                className="hover:text-accent-hover transition-colors"
+                            >
+                                <X size={12} />
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
