@@ -15,11 +15,13 @@ import CalendarContent from "../../CalendarContent";
 import CompareComingSoon from "./CompareComingSoon";
 
 import { useUnsavedLeaveGuard } from "@/hooks/common/useUnsavedLeaveGuard";
+import { useFileText } from "@/hooks/files/useFileText";
 
 type UnifiedPanelProps = {
     type: "note" | "document" | "audio";
     id: string;
     sessionId: number;
+    fileName?: string;
     onClose: () => void;
     onCreated?: (noteId: number) => void;
     onUpdated?: (payload: {
@@ -34,6 +36,7 @@ export default function UnifiedPanel({
                                          type,
                                          id,
                                          sessionId,
+                                         fileName,
                                          onClose,
                                          onCreated,
                                          onUpdated,
@@ -50,9 +53,32 @@ export default function UnifiedPanel({
     const handleSyncRef = useRef<(() => Promise<void>) | null>(null);
     const prevSavingRef = useRef(saving);
 
+    const { text: documentText } = useFileText(
+        type === "document" ? Number(id) : null
+    );
+
     useEffect(() => {
+        // console.log("UnifiedPanel - fileName:", fileName);
+        // console.log("UnifiedPanel - type:", type);
+        // console.log("UnifiedPanel - id:", id);
+
         setCurrentTab("edit");
-    }, [id]);
+
+        if (type === "document") {
+            if (fileName) {
+                const fileNameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
+                console.log("Setting title to:", fileNameWithoutExt);
+                setTitle(fileNameWithoutExt);
+            } else {
+                console.log("fileName is undefined, setting title to '문서'");
+                setTitle("문서");
+            }
+            setContent(documentText || "");
+        } else if (type === "audio") {
+            setTitle("음성");
+            setContent("");
+        }
+    }, [id, type, documentText, fileName]);
 
     const handleSave = async () => {
         if (!handleSyncRef.current) return;
@@ -92,13 +118,11 @@ export default function UnifiedPanel({
         prevSavingRef.current = saving;
     }, [saving, saved, title, id, type, onUpdated]);
 
-    // 요약본으로 노트 생성 시 콜백
     const handleNoteCreatedFromSummary = useCallback(() => {
-        console.log(" 요약본으로 노트 생성됨!");
-        // onUpdated를 호출하여 WorkspacePage의 refetchNotes 실행
+        // console.log(" 요약본으로 노트 생성됨!");
         if (onUpdated) {
             onUpdated({
-                noteId: 0, // 임시값
+                noteId: 0,
                 title: "새 노트",
                 moddate: new Date().toISOString(),
             });
@@ -130,6 +154,8 @@ export default function UnifiedPanel({
         }),
         [id, sessionId, onCreated]
     );
+
+    // console.log("UnifiedPanel - current title state:", title);
 
     return (
         <div className="h-full flex flex-col bg-white dark:bg-surface-dark">
@@ -175,7 +201,7 @@ export default function UnifiedPanel({
                             <DocumentSummaryContent
                                 fileId={Number(id)}
                                 sessionId={sessionId}
-                                onNoteCreated={handleNoteCreatedFromSummary} // 👈 핵심 추가!
+                                onNoteCreated={handleNoteCreatedFromSummary}
                             />
                         )}
                     </>

@@ -20,6 +20,7 @@ import { SummaryStatusBadge } from "./SummaryStatusBadge";
 import SummaryFormatRenderer from "@/app/components/summary/Summaryformatrenderer";
 import SummaryActions from "./SummaryActions";
 import SummaryRequestButton from "@/app/components/summary/SummaryRequestButton";
+import DownloadButton from "@/app/components/notes/download/DownloadButton";
 
 type SummaryHistoryItem = {
     summaryId: number;
@@ -38,7 +39,7 @@ type Props = {
     onNoteCreated?: () => void;
 };
 
-const PAGE_SIZE = 6; // 논리적 페이지 크기 (레이아웃과 무관)
+const PAGE_SIZE = 6;
 
 export default function SummaryContent({
                                            type,
@@ -49,8 +50,7 @@ export default function SummaryContent({
                                            onRequestSuccess,
                                            onNoteCreated,
                                        }: Props) {
-    const [selectedSummaryId, setSelectedSummaryId] =
-        useState<number | null>(null);
+    const [selectedSummaryId, setSelectedSummaryId] = useState<number | null>(null);
     const [page, setPage] = useState(0);
 
     useEffect(() => {
@@ -70,10 +70,7 @@ export default function SummaryContent({
     const totalPages = Math.ceil(history.length / PAGE_SIZE);
 
     const visibleItems = useMemo(() => {
-        return history.slice(
-            page * PAGE_SIZE,
-            page * PAGE_SIZE + PAGE_SIZE
-        );
+        return history.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
     }, [history, page]);
 
     const refetchAfterDelete = () => {
@@ -103,6 +100,36 @@ export default function SummaryContent({
         }
     };
 
+    const getSummaryContent = () => {
+        if (!detail) return "";
+
+        let content = "";
+
+        if (detail.mainTopic) {
+            content += `핵심 주제\n${detail.mainTopic}\n\n`;
+        }
+
+        if (detail.keyTakeaways && detail.keyTakeaways.length > 0) {
+            content += "주요 포인트\n";
+            detail.keyTakeaways.forEach((item, idx) => {
+                content += `${idx + 1}. ${item}\n`;
+            });
+            content += "\n";
+        }
+
+        if (detail.sections && detail.sections.length > 0) {
+            detail.sections.forEach((section) => {
+                content += `${section.title}\n${section.content}\n\n`;
+            });
+        }
+
+        if (detail.finalDocument && (!detail.sections || detail.sections.length === 0)) {
+            content += detail.finalDocument;
+        }
+
+        return content;
+    };
+
     if (loadingHistory) {
         return (
             <div className="flex items-center justify-center h-full py-12">
@@ -125,27 +152,32 @@ export default function SummaryContent({
         );
     }
 
-    const isProcessing =
-        selectedHistoryItem?.status === "REQUESTED";
+    const isProcessing = selectedHistoryItem?.status === "REQUESTED";
 
     return (
         <div className="h-full flex flex-col min-w-0">
-            {/* 헤더 */}
             <div className="flex items-center justify-between px-3 py-2 border-b">
                 <div className="flex items-center gap-2">
                     <Sparkles size={16} />
                     <span className="text-sm font-bold">요약 내역</span>
                 </div>
-                <SummaryRequestButton
-                    type={type}
-                    targetId={targetId}
-                    sessionId={sessionId}
-                    size="sm"
-                    onRequested={onRequestSuccess}
-                />
+                <div className="flex items-center gap-2">
+                    {detail && !isProcessing && (
+                        <DownloadButton
+                            title={`요약 v${selectedHistoryItem?.versionNo || ""}`}
+                            content={getSummaryContent()}
+                        />
+                    )}
+                    <SummaryRequestButton
+                        type={type}
+                        targetId={targetId}
+                        sessionId={sessionId}
+                        size="sm"
+                        onRequested={onRequestSuccess}
+                    />
+                </div>
             </div>
 
-            {/* 버전 리스트 */}
             <div className="flex items-start gap-2 px-3 py-3 border-b">
                 <button
                     onClick={() => setPage((p) => Math.max(p - 1, 0))}
@@ -155,45 +187,34 @@ export default function SummaryContent({
                     <ChevronLeft size={18} />
                 </button>
 
-                <div
-                    className="
-            grid flex-1 gap-2
-            grid-cols-[repeat(auto-fit,minmax(140px,1fr))]
-          "
-                >
+                <div className="grid flex-1 gap-2 grid-cols-[repeat(auto-fit,minmax(140px,1fr))]">
                     {visibleItems.map((item) => {
-                        const selected =
-                            item.summaryId === selectedSummaryId;
+                        const selected = item.summaryId === selectedSummaryId;
                         const isRequested = item.status === "REQUESTED";
 
                         return (
                             <div
                                 key={item.summaryId}
-                                onClick={() =>
-                                    setSelectedSummaryId(item.summaryId)
-                                }
+                                onClick={() => setSelectedSummaryId(item.summaryId)}
                                 className={`
-                  relative p-3 rounded-xl border cursor-pointer
-                  ${
-                                    selected
-                                        ? "border-accent bg-accent-soft"
-                                        : "border-border-light hover:border-accent/40"
+                                    relative p-3 rounded-xl border cursor-pointer
+                                    ${selected
+                                    ? "border-accent bg-accent-soft"
+                                    : "border-border-light hover:border-accent/40"
                                 }
-                `}
+                                `}
                             >
                                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-bold truncate">
-                    v{item.versionNo}
-                  </span>
+                                    <span className="text-sm font-bold truncate">
+                                        v{item.versionNo}
+                                    </span>
                                     <SummaryStatusBadge status={item.status} />
                                 </div>
 
                                 <div className="flex items-center justify-between mt-1 gap-2">
-                  <span className="text-xs truncate">
-                    {new Date(item.createdAt).toLocaleDateString(
-                        "ko-KR"
-                    )}
-                  </span>
+                                    <span className="text-xs truncate">
+                                        {new Date(item.createdAt).toLocaleDateString("ko-KR")}
+                                    </span>
 
                                     <button
                                         onClick={(e) => {
@@ -204,11 +225,7 @@ export default function SummaryContent({
                                         }}
                                         className="p-1 text-red-500 hover:bg-red-50 rounded"
                                     >
-                                        {isRequested ? (
-                                            <XCircle size={14} />
-                                        ) : (
-                                            <Trash2 size={14} />
-                                        )}
+                                        {isRequested ? <XCircle size={14} /> : <Trash2 size={14} />}
                                     </button>
                                 </div>
                             </div>
@@ -217,11 +234,7 @@ export default function SummaryContent({
                 </div>
 
                 <button
-                    onClick={() =>
-                        setPage((p) =>
-                            Math.min(p + 1, totalPages - 1)
-                        )
-                    }
+                    onClick={() => setPage((p) => Math.min(p + 1, totalPages - 1))}
                     disabled={page >= totalPages - 1}
                     className="p-1 disabled:opacity-30"
                 >
@@ -229,7 +242,6 @@ export default function SummaryContent({
                 </button>
             </div>
 
-            {/* 상세 */}
             <div className="flex-1 overflow-y-auto p-4">
                 {isProcessing ? (
                     <div className="flex items-center justify-center py-16">
@@ -240,9 +252,7 @@ export default function SummaryContent({
                         <Loader2 className="w-8 h-8 animate-spin" />
                     </div>
                 ) : !detail ? (
-                    <div className="text-center py-12">
-                        요약을 선택하세요
-                    </div>
+                    <div className="text-center py-12">요약을 선택하세요</div>
                 ) : (
                     <div className="space-y-6">
                         <SummaryActions
