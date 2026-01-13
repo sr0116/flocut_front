@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 
 import PanelHeader, { PanelTab } from "./PanelHeader";
 import PanelFooter from "./PanelFooter";
@@ -92,6 +92,19 @@ export default function UnifiedPanel({
         prevSavingRef.current = saving;
     }, [saving, saved, title, id, type, onUpdated]);
 
+    // 요약본으로 노트 생성 시 콜백
+    const handleNoteCreatedFromSummary = useCallback(() => {
+        console.log(" 요약본으로 노트 생성됨!");
+        // onUpdated를 호출하여 WorkspacePage의 refetchNotes 실행
+        if (onUpdated) {
+            onUpdated({
+                noteId: 0, // 임시값
+                title: "새 노트",
+                moddate: new Date().toISOString(),
+            });
+        }
+    }, [onUpdated]);
+
     const noteContentProps = useMemo(
         () => ({
             id,
@@ -162,6 +175,7 @@ export default function UnifiedPanel({
                             <DocumentSummaryContent
                                 fileId={Number(id)}
                                 sessionId={sessionId}
+                                onNoteCreated={handleNoteCreatedFromSummary} // 👈 핵심 추가!
                             />
                         )}
                     </>

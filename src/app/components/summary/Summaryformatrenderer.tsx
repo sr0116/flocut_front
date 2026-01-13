@@ -14,10 +14,7 @@ type Props = {
   finalDocument?: string | null;
 };
 
-/**
- * 요약 결과를 구조화된 형태로 렌더링하는 컴포넌트
- * 백엔드에서 받은 DocumentSummaryView를 시각적으로 표현
- */
+//   요약 결과 컴포넌트
 export default function SummaryFormatRenderer({
                                                 mainTopic,
                                                 keyTakeaways,
@@ -38,7 +35,7 @@ export default function SummaryFormatRenderer({
 
   return (
     <div className="space-y-6">
-      {/* 📌 핵심 주제 */}
+      {/*  핵심 주제 */}
       {mainTopic && (
         <div className="p-4 rounded-xl bg-gradient-to-br from-accent/5 to-accent/10 border-l-4 border-accent">
           <div className="flex items-start gap-3">
@@ -57,7 +54,7 @@ export default function SummaryFormatRenderer({
         </div>
       )}
 
-      {/* 🔑 주요 포인트 */}
+      {/*  주요 포인트 */}
       {keyTakeaways && keyTakeaways.length > 0 && (
         <div className="p-4 rounded-xl bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark">
           <div className="flex items-center gap-2 mb-3">
@@ -82,7 +79,7 @@ export default function SummaryFormatRenderer({
         </div>
       )}
 
-      {/* 📝 섹션별 내용 */}
+      {/*  섹션별 내용 */}
       {sections && sections.length > 0 && (
         <div className="space-y-4">
           {sections.map((section, idx) => (
@@ -108,7 +105,7 @@ export default function SummaryFormatRenderer({
         </div>
       )}
 
-      {/* 📄 전체 문서 (섹션이 없을 때만 표시) */}
+      {/* 전체 문서 (섹션이 없을 때만 표시) */}
       {finalDocument && (!sections || sections.length === 0) && (
         <div className="p-4 rounded-xl bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark">
           <div

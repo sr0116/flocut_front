@@ -2,7 +2,7 @@
 
 import { Loader2, FileText } from "lucide-react";
 import { useFileText } from "@/hooks/files/useFileText";
-import SummaryRequestButton from "@/app/components/shared/SummaryRequestButton";
+import SummaryRequestButton from "@/app/components/summary/SummaryRequestButton";
 
 type Props = {
     fileId: string;

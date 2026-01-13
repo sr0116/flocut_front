@@ -7,12 +7,11 @@ import {
     Calendar,
     MoreVertical,
     Trash2,
-    Sparkles,
-    GitCompare,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import Checkbox from "@/app/components/ui/form/Checkbox";
 import { useNoteAction } from "@/hooks/notes/useNoteAction";
+import { useFileAction } from "@/hooks/files/useFileAction";
 
 type WorkspaceItem = {
     id: string;
@@ -20,6 +19,7 @@ type WorkspaceItem = {
     title: string;
     date: string;
     noteId?: number;
+    fileId?: number;
 };
 
 type Props = {
@@ -41,7 +41,9 @@ export default function WorkspaceListItem({
                                           }: Props) {
     const [showMenu, setShowMenu] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
+
     const { handleSoftDelete } = useNoteAction();
+    const { handleDeleteWithConfirm } = useFileAction();
 
     useEffect(() => {
         const handler = (e: MouseEvent) => {
@@ -92,18 +94,14 @@ export default function WorkspaceListItem({
 
             {/* 텍스트 영역 */}
             <div className="flex-1 min-w-0">
-                {/* 제목 */}
                 <h3 className="text-sm font-medium truncate text-text-primary-light dark:text-text-primary-dark">
                     {item.title}
                 </h3>
 
-                {/* 날짜 */}
                 {!compact && (
                     <div className="mt-0.5 flex items-center gap-1.5 text-xs text-text-muted-light dark:text-text-muted-dark">
                         <Calendar size={12} className="flex-shrink-0" />
-                        <span className="truncate">
-                            {item.date}
-                        </span>
+                        <span className="truncate">{item.date}</span>
                     </div>
                 )}
             </div>
@@ -125,33 +123,37 @@ export default function WorkspaceListItem({
 
                 {showMenu && (
                     <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-lg shadow-lg z-10">
-                        {item.type === "note" && (
-                            <>
-                                <button className="w-full px-4 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent-soft transition-colors">
-                                    <Sparkles size={14} className="flex-shrink-0" />
-                                    <span>AI 요약</span>
-                                </button>
-                                <button className="w-full px-4 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent-soft transition-colors">
-                                    <GitCompare size={14} className="flex-shrink-0" />
-                                    <span>비교</span>
-                                </button>
-                                <div className="h-px bg-border-light dark:bg-border-dark my-1" />
-                            </>
+                        {item.type === "note" ? (
+                            // 노트: 휴지통 이동
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (item.noteId) {
+                                        handleSoftDelete(item.noteId, onDeleted);
+                                    }
+                                    setShowMenu(false);
+                                }}
+                                className="w-full px-4 py-2 text-sm text-left flex items-center gap-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                            >
+                                <Trash2 size={14} className="flex-shrink-0" />
+                                <span>휴지통으로 이동</span>
+                            </button>
+                        ) : (
+                            // 파일/문서: 즉시 삭제
+                            // 드롭다운 메뉴
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (item.fileId) {
+                                        handleDeleteWithConfirm(item.fileId, onDeleted);
+                                    }
+                                    setShowMenu(false);
+                                }}
+                            >
+                                <Trash2 size={14} />
+                                <span>삭제</span>
+                            </button>
                         )}
-
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                if (item.noteId) {
-                                    handleSoftDelete(item.noteId, onDeleted);
-                                }
-                                setShowMenu(false);
-                            }}
-                            className="w-full px-4 py-2 text-sm text-left flex items-center gap-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                        >
-                            <Trash2 size={14} className="flex-shrink-0" />
-                            <span>휴지통으로 이동</span>
-                        </button>
                     </div>
                 )}
             </div>

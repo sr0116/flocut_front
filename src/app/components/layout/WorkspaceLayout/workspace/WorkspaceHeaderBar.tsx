@@ -16,12 +16,13 @@ import {
     List as ListIcon,
     ChevronDown,
     Trash2,
-    Download,
-    Archive,
     CheckSquare,
 } from "lucide-react";
 import { WorkspaceFilter, SortBy, ViewMode } from "@/hooks/workspace/workspace";
 import { useMediaQuery } from "@/hooks/common/useMediaQuery";
+import { useNoteAction } from "@/hooks/notes/useNoteAction";
+import { useFileAction } from "@/hooks/files/useFileAction";
+import { toast } from "sonner";
 
 type Props = {
     filter: WorkspaceFilter;
@@ -29,7 +30,6 @@ type Props = {
     selectedCount: number;
     onClearSelection: () => void;
     onSelectAll: () => void;
-    onBulkDelete: () => void;
     totalItems: number;
 
     sessionId: number;
@@ -42,6 +42,11 @@ type Props = {
     onSortChange: (sort: SortBy) => void;
     viewMode: ViewMode;
     onViewModeChange: (mode: ViewMode) => void;
+
+    //  대량 삭제용 추가
+    allItems: Array<{ id: string; type: string; noteId?: number; fileId?: number }>;
+    selectedItems: Set<string>;
+    onBulkDeleteComplete: () => void;
 };
 
 export default function WorkspaceHeaderBar({
@@ -50,7 +55,6 @@ export default function WorkspaceHeaderBar({
                                                selectedCount,
                                                onClearSelection,
                                                onSelectAll,
-                                               onBulkDelete,
                                                totalItems,
                                                sessionId,
                                                onUploaded,
@@ -61,10 +65,16 @@ export default function WorkspaceHeaderBar({
                                                onSortChange,
                                                viewMode,
                                                onViewModeChange,
+                                               allItems,
+                                               selectedItems,
+                                               onBulkDeleteComplete,
                                            }: Props) {
     const isMobile = useMediaQuery("(max-width: 640px)");
     const isTablet = useMediaQuery("(max-width: 900px)");
     const [showSortDropdown, setShowSortDropdown] = useState(false);
+
+    const { handleSoftDelete } = useNoteAction();
+    const { handleDelete: handleFileDelete } = useFileAction();
 
     const filters: {
         key: WorkspaceFilter;
@@ -88,9 +98,47 @@ export default function WorkspaceHeaderBar({
 
     const allSelected = selectedCount > 0 && selectedCount === totalItems;
 
+    //  대량 삭제 핸들러
+    const handleBulkDelete = async () => {
+        if (selectedCount === 0) return;
+
+        const confirmed = window.confirm(
+            `${selectedCount}개 항목을 삭제하시겠습니까?`
+        );
+
+        if (!confirmed) return;
+
+        try {
+            const noteIds = allItems
+                .filter((item) => selectedItems.has(item.id) && item.noteId)
+                .map((item) => item.noteId!);
+
+            const fileIds = allItems
+                .filter((item) => selectedItems.has(item.id) && item.fileId)
+                .map((item) => item.fileId!);
+
+            //  노트 휴지통 이동
+            for (const noteId of noteIds) {
+                await handleSoftDelete(noteId);
+            }
+
+            //  파일 즉시 삭제
+            for (const fileId of fileIds) {
+                await handleFileDelete(fileId);
+            }
+
+            toast.success("선택한 항목이 삭제되었습니다.");
+            onClearSelection();
+            onBulkDeleteComplete();
+        } catch (error) {
+            toast.error("삭제 중 오류가 발생했습니다.");
+            console.error(error);
+        }
+    };
+
     return (
         <div className="bg-white dark:bg-surface-dark">
-            {/*  선택 모드 바 */}
+            {/* 선택 모드 바 */}
             {selectedCount > 0 && (
                 <div className="px-4 lg:px-6 py-3 bg-accent-soft border-b border-accent/20">
                     <div className="flex items-center justify-between">
@@ -107,14 +155,13 @@ export default function WorkspaceHeaderBar({
                         </div>
 
                         <div className="flex items-center gap-2">
-                            {/* 대량 작업 버튼 */}
                             <Button
                                 size="sm"
                                 variant="secondary"
-                                onClick={onBulkDelete}
+                                onClick={handleBulkDelete}
                             >
                                 <Trash2 size={14} />
-                                <span className="hidden sm:inline">휴지통으로 이동</span>
+                                <span className="hidden sm:inline">삭제</span>
                             </Button>
 
                             <Button
@@ -202,7 +249,7 @@ export default function WorkspaceHeaderBar({
 
                     {/* 우측: 액션 */}
                     <div className="flex items-center gap-2 flex-shrink-0">
-                        {/*  전체 선택 버튼 */}
+                        {/* 전체 선택 버튼 */}
                         {!isMobile && totalItems > 0 && (
                             <Button
                                 size="sm"
@@ -326,7 +373,7 @@ export default function WorkspaceHeaderBar({
                 </div>
             </div>
 
-            {/* 모바일: 필터 탭 (두 번째 행) */}
+            {/* 모바일: 필터 탭 */}
             {isMobile && (
                 <div className="px-4 pb-3">
                     <div className="flex gap-1 overflow-x-auto scrollbar-hide">
@@ -354,7 +401,7 @@ export default function WorkspaceHeaderBar({
                 </div>
             )}
 
-            {/* 활성 필터 칩 (검색어가 있을 때) */}
+            {/* 활성 필터 칩 (검색어) */}
             {searchQuery && (
                 <div className="px-4 lg:px-6 pb-3">
                     <div className="flex items-center gap-2 flex-wrap">
