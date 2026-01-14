@@ -72,19 +72,20 @@ export default function WorkspaceLayout({
   return (
     <div className="h-screen flex flex-col bg-background-light dark:bg-background-dark">
       <WorkspaceHeader onMenuClick={() => setNavMode("full")} />
-
       <div className="flex flex-1 min-h-0 relative">
+        {/* 모바일용 배경 오버레이 */}
         {isMobile && navMode === "full" && (
           <div
-            className="fixed inset-0 top-14 z-40 bg-transparent"
+            className="fixed inset-0 top-14 z-[60] bg-black/20 backdrop-blur-sm" // 컬러를 bg-black/20 등으로 명확히 지정
             onClick={() => setNavMode("hidden")}
           />
         )}
 
         {navMode !== "hidden" && (
-          <div
-            className={`relative flex-shrink-0 ${
-              isModalRoute ? "pointer-events-none opacity-60" : "z-50"
+          <aside
+            className={`relative flex-shrink-0 transition-all duration-300 ${
+              // 모달이 뜰 때 z-index를 낮춰서 클릭되지 않게 함
+              isModalRoute ? "z-0 pointer-events-none opacity-60" : "z-40"
             }`}
           >
             <GlobalNav
@@ -97,12 +98,13 @@ export default function WorkspaceLayout({
               }}
               onToggle={!isMobile ? handleManualToggle : undefined}
             />
-          </div>
+          </aside>
         )}
 
-        <main className="flex-1 min-w-0 min-h-0 overflow-hidden relative z-10">
+        {/* 메인 영역의 z-index를 네비보다 높게 설정하여 모달이 네비를 덮도록 함 */}
+        <main className="flex-1 min-w-0 min-h-0 overflow-hidden relative z-50">
           {children}
-          <div id="workspace-floating-root" className="relative z-20" />
+          <div id="workspace-floating-root" className="relative z-[100]" />
         </main>
       </div>
     </div>

@@ -21,10 +21,10 @@ export default function SummaryEmptyState({
         <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
             {/* 아이콘 */}
             <div className="relative mb-6">
-                {/*<div className="w-20 h-20 rounded-full bg-gradient-to-br from-accent/10 to-accent/5 flex items-center justify-center">*/}
-                {/*    <FileText size={36} className="text-accent/40" />*/}
-                {/*</div>*/}
-                <div className="absolute -top-2 -right-2 w-10 h-10 rounded-full bg-accent flex items-center justify-center shadow-lg">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-accent/10 to-accent/5 flex items-center justify-center">
+                    <FileText size={36} className="text-accent/40" />
+                </div>
+                <div className="absolute -top-2 -right-2 w-10 h-10 rounded-full bg-accent flex items-center justify-center ">
                     <Sparkles size={20} className="text-white" />
                 </div>
             </div>

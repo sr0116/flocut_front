@@ -23,7 +23,17 @@ export default function DocumentContent({ fileId, sessionId }: Props) {
   // 버튼 엘리먼트에 직접 접근하기 위한 ref 생성
   const summaryBtnRef = useRef<HTMLButtonElement>(null);
 
-  // 로딩 상태 중앙 정렬
+  // 컨펌 완료 후 실제 요청 실행 로직
+  const handleConfirmSummary = () => {
+    setIsConfirmOpen(false);
+
+    // 다이얼로그에서 '확인'을 눌렀을 때만 실제 버튼의 클릭 이벤트를 트리거합니다.
+    if (summaryBtnRef.current) {
+      summaryBtnRef.current.click();
+    }
+  };
+
+  // 로딩 상태 처리
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-3">
@@ -33,7 +43,7 @@ export default function DocumentContent({ fileId, sessionId }: Props) {
     );
   }
 
-  // 에러/빈 데이터 상태 중앙 정렬
+  // 에러/빈 데이터 상태 처리
   if (error || !text || text.trim().length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -54,15 +64,6 @@ export default function DocumentContent({ fileId, sessionId }: Props) {
     );
   }
 
-  // 컨펌 완료 후 실제 요청 실행 로직
-  const handleConfirmSummary = () => {
-    setIsConfirmOpen(false);
-    // ref를 통해 버튼의 클릭 이벤트를 직접 트리거
-    if (summaryBtnRef.current) {
-      summaryBtnRef.current.click();
-    }
-  };
-
   return (
     <div className="flex flex-col h-full overflow-hidden bg-background-light dark:bg-background-dark">
       {/* 헤더 영역 */}
@@ -72,10 +73,15 @@ export default function DocumentContent({ fileId, sessionId }: Props) {
           <h4 className="font-bold text-lg text-text-primary-light dark:text-white">원본 파일</h4>
         </div>
 
-        <div onClickCapture={(e) => {
-          e.stopPropagation();
-          setIsConfirmOpen(true);
-        }}>
+        {/* 캡처링을 쓰지 않고 버튼을 감싸는 div에서 클릭을 가로챕니다.
+          pointer-events-none을 통해 내부 버튼이 직접 클릭되는 것을 막고,
+          div 클릭 시 다이얼로그를 띄웁니다.
+        */}
+        <div className="relative">
+          <div
+            className="absolute inset-0 z-10 cursor-pointer"
+            onClick={() => setIsConfirmOpen(true)}
+          />
           <SummaryRequestButton
             ref={summaryBtnRef}
             type="document"
@@ -85,7 +91,7 @@ export default function DocumentContent({ fileId, sessionId }: Props) {
         </div>
       </div>
 
-      {/* 원문 내용 영역 - 가독성 개선 */}
+      {/* 원문 내용 영역 */}
       <div className="flex-1 overflow-y-auto custom-scrollbar bg-surface-light/30 dark:bg-background-dark">
         <div className="max-w-4xl mx-auto p-8 lg:p-12">
           <Card variant="outlined" padding="none" className="border-none shadow-none bg-transparent">
