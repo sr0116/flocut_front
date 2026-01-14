@@ -42,7 +42,7 @@ export default function ConfirmDialog({
         <AnimatePresence>
             {open && (
                 <>
-                    <ModalOverlay onClose={onClose} />
+                    {/*<ModalOverlay onClose={onClose} />*/}
 
                     <div className="fixed inset-0 z-50 flex items-start justify-center pt-28 px-4">
                         <motion.div

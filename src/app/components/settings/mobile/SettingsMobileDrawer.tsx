@@ -45,7 +45,7 @@ export default function SettingsMobileDrawer({
             <AnimatePresence>
                 {open && (
                     <>
-                        <ModalOverlay onClose={onClose} />
+                        {/*<ModalOverlay onClose={onClose} />*/}
 
                         <motion.aside
                             initial={{ x: "-100%" }}

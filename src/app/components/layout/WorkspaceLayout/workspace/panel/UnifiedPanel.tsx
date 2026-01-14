@@ -12,10 +12,7 @@ import DocumentContent from "@/app/components/documents/DocumentContent";
 import NoteSummaryContent from "@/app/components/notes/NoteSummaryContent";
 import DocumentSummaryContent from "@/app/components/documents/DocumentSummaryContent";
 
-import CalendarContent from "../../CalendarContent";
 import CompareComingSoon from "./CompareComingSoon";
-
-import { useUnsavedLeaveGuard } from "@/hooks/common/useUnsavedLeaveGuard";
 import { useFileText } from "@/hooks/files/useFileText";
 
 type UnifiedPanelProps = {
@@ -64,8 +61,7 @@ export default function UnifiedPanel({
 
         if (type === "document") {
             if (fileName) {
-                const fileNameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
-                setTitle(fileNameWithoutExt);
+                setTitle(fileName.replace(/\.[^/.]+$/, ""));
             } else {
                 setTitle("문서");
             }
@@ -76,10 +72,9 @@ export default function UnifiedPanel({
         }
     }, [id, type, documentText, fileName]);
 
-    // 저장 핸들러
+    // 수동 저장
     const handleSave = async () => {
         if (!handleSyncRef.current) return;
-
         await handleSyncRef.current();
 
         if (type === "note" && id !== "new") {
@@ -91,43 +86,26 @@ export default function UnifiedPanel({
         }
     };
 
-    const { confirmNavigation } = useUnsavedLeaveGuard(
-        !saved && !saving,
-        handleSave
-    );
-
-    const handleCloseWithGuard = () => {
-        confirmNavigation(() => onClose());
-    };
-
-    // 저장 완료 시 업데이트 전파
+    // 저장 완료 시 리스트 반영
     useEffect(() => {
-        const wasSaving = prevSavingRef.current;
-        const isNowSaved = !saving && saved;
-
-        if (wasSaving && isNowSaved && type === "note" && id !== "new") {
+        if (prevSavingRef.current && !saving && saved && type === "note" && id !== "new") {
             onUpdated?.({
                 noteId: Number(id),
                 title,
                 moddate: new Date().toISOString(),
             });
         }
-
         prevSavingRef.current = saving;
     }, [saving, saved, title, id, type, onUpdated]);
 
-    // 요약에서 노트 생성 시 콜백
     const handleNoteCreatedFromSummary = useCallback(() => {
-        if (onUpdated) {
-            onUpdated({
-                noteId: 0,
-                title: "새 노트",
-                moddate: new Date().toISOString(),
-            });
-        }
+        onUpdated?.({
+            noteId: 0,
+            title: "새 노트",
+            moddate: new Date().toISOString(),
+        });
     }, [onUpdated]);
 
-    // NoteContent Props
     const noteContentProps = useMemo(
         () => ({
             id,
@@ -156,7 +134,6 @@ export default function UnifiedPanel({
 
     return (
         <div className="h-full flex flex-col bg-white dark:bg-surface-dark">
-            {/* 헤더 */}
             <PanelHeader
                 type={type}
                 currentTab={currentTab}
@@ -164,7 +141,7 @@ export default function UnifiedPanel({
                 saved={saved}
                 saving={saving}
                 onSave={handleSave}
-                onClose={handleCloseWithGuard}
+                onClose={onClose}
                 sessionId={sessionId}
                 noteId={id !== "new" ? Number(id) : undefined}
                 title={title}
@@ -172,26 +149,18 @@ export default function UnifiedPanel({
                 isMobile={isMobile}
             />
 
-            {/* 본문 */}
             <div className="flex-1 overflow-y-auto custom-scrollbar">
-                {/* 편집 탭 */}
                 {currentTab === "edit" && (
                     <>
                         {type === "note" && (
                             <NoteContent key={`note-edit-${id}`} {...noteContentProps} />
                         )}
-
                         {type === "document" && (
-                            <DocumentContent
-                                key={`doc-edit-${id}`}
-                                fileId={id}
-                                sessionId={sessionId}
-                            />
+                            <DocumentContent fileId={id} sessionId={sessionId} />
                         )}
                     </>
                 )}
 
-                {/* 요약 탭 */}
                 {currentTab === "summary" && (
                     <>
                         {type === "note" && (
@@ -201,7 +170,6 @@ export default function UnifiedPanel({
                                 onNoteCreated={handleNoteCreatedFromSummary}
                             />
                         )}
-
                         {type === "document" && (
                             <DocumentSummaryContent
                                 fileId={Number(id)}
@@ -212,16 +180,9 @@ export default function UnifiedPanel({
                     </>
                 )}
 
-                {/* 비교 탭 */}
                 {currentTab === "compare" && <CompareComingSoon />}
-
-                {/* 캘린더 탭 */}
-                {/*{currentTab === "calendar" && type === "note" && (*/}
-                {/*    <CalendarContent noteId={id} />*/}
-                {/*)}*/}
             </div>
 
-            {/* 푸터 (노트만) */}
             {type === "note" && (
                 <PanelFooter
                     saved={saved}
