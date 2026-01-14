@@ -1,4 +1,3 @@
-// components/summary/SummarySkeleton.tsx
 "use client";
 
 export default function SummarySkeleton() {

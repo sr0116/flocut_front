@@ -1,8 +1,7 @@
-// components/notes/NoteSummaryContent.tsx
 "use client";
 
 import SummaryContent from "@/app/components/summary/SummaryContent";
-import { useSummaryHistory } from "@/hooks/summaries/useSummaryHistory";
+import { useNoteSummary } from "@/hooks/summaries/useNoteSummary";
 
 type Props = {
     noteId: string;
@@ -10,18 +9,14 @@ type Props = {
     onNoteCreated?: () => void;
 };
 
+
 export default function NoteSummaryContent({
                                                noteId,
                                                sessionId,
                                                onNoteCreated,
                                            }: Props) {
     const id = Number(noteId);
-
-    const { history, loading, refetch } = useSummaryHistory(
-        id,
-        sessionId,
-        "note" //  명시적으로 type 전달
-    );
+    const { history, loading, refetch } = useNoteSummary(id);
 
     return (
         <SummaryContent

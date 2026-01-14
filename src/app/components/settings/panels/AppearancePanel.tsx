@@ -37,7 +37,7 @@ export default function AppearancePanel() {
         []
     );
 
-    // 🔥 컬러 테마 변경 (로그인 상태에서만 저장)
+    // 컬러 테마 변경 (로그인 상태에서만 저장)
     const handleColorThemeChange = (next: ColorTheme) => {
         dispatch(setColorTheme(next));
 

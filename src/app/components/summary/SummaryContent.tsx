@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 import { SummaryStatus } from "@/lib/graphql/summary/summary.type";
 import { useSummaryView } from "@/hooks/summaries/useSummaryView";
@@ -13,7 +13,6 @@ import SummarySkeleton from "./SummarySkeleton";
 import SummaryVersionGrid from "./SummaryVersionGrid";
 import SummaryActions from "./SummaryActions";
 import SummaryRequestButton from "./SummaryRequestButton";
-
 import DownloadButton from "@/app/components/notes/download/DownloadButton";
 import SummaryFormatRenderer from "@/app/components/summary/Summaryformatrenderer";
 
@@ -36,6 +35,9 @@ type Props = {
 
 const PAGE_SIZE = 6;
 
+ //  요약 컨텐츠 공통 컴포넌트
+ //  노트: 버전 그리드 숨김, 단일 요약 표시
+ //  문서: 버전 그리드 표시, 히스토리 관리
 export default function SummaryContent({
                                            type,
                                            targetId,
@@ -128,13 +130,17 @@ export default function SummaryContent({
             {/* 헤더 */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-border-light dark:border-border-dark bg-white dark:bg-surface-dark">
                 <h3 className="text-sm font-bold text-text-primary-light dark:text-text-primary-dark">
-                    요약 내역
+                    {type === "note" ? "노트 요약" : "요약 내역"}
                 </h3>
 
                 <div className="flex items-center gap-2">
                     {detail && !isProcessing && (
                         <DownloadButton
-                            title={`요약 v${selectedHistoryItem?.versionNo || ""}`}
+                            title={
+                                type === "note"
+                                    ? "노트 요약"
+                                    : `요약 v${selectedHistoryItem?.versionNo || ""}`
+                            }
                             content={getSummaryContent()}
                         />
                     )}
@@ -149,19 +155,21 @@ export default function SummaryContent({
                 </div>
             </div>
 
-            {/* 버전 그리드 */}
-            <SummaryVersionGrid
-                items={visibleItems}
-                selectedId={selectedSummaryId}
-                page={page}
-                totalPages={totalPages}
-                onSelect={setSelectedSummaryId}
-                onPageChange={setPage}
-                onRefetch={() => {
-                    setSelectedSummaryId(null);
-                    onRequestSuccess();
-                }}
-            />
+            {/* 버전 그리드 (문서만 표시) */}
+            {type === "document" && (
+                <SummaryVersionGrid
+                    items={visibleItems}
+                    selectedId={selectedSummaryId}
+                    page={page}
+                    totalPages={totalPages}
+                    onSelect={setSelectedSummaryId}
+                    onPageChange={setPage}
+                    onRefetch={() => {
+                        setSelectedSummaryId(null);
+                        onRequestSuccess();
+                    }}
+                />
+            )}
 
             {/* 본문 */}
             <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">

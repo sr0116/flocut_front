@@ -1,5 +1,4 @@
 
-// components/summary/SummaryEmptyState.tsx
 "use client";
 
 import { FileText, Sparkles } from "lucide-react";

@@ -1,69 +1,47 @@
-// hooks/summaries/useNoteSummary.ts
 "use client";
 
-import { useState, useEffect } from "react";
-import { checkNoteSummary } from "@/lib/rest/summary/summary.rest";
-import { useSummaryView } from "./useSummaryView";
-import { SummaryStatus } from "@/lib/graphql/summary/summary.type";
+import { NOTE_LATEST_SUMMARY_QUERY } from "@/lib/graphql/summary/summary.query";
+import {
+    SummaryHistoryItem,
+    SummaryStatus,
+    SummaryView,
+} from "@/lib/graphql/summary/summary.type";
+import {useQuery} from "@apollo/client/react";
 
-/**
- * 노트 요약 조회 (단일 요약만 존재)
- * 1. REST API로 요약 존재 확인
- * 2. summaryId로 GraphQL 상세 조회
- */
+type NoteLatestSummaryResponse = {
+    noteLatestSummary: SummaryView | null;
+};
+
+// 노트 요약 조회 Hook (GraphQL)
+
 export function useNoteSummary(noteId: number | null) {
-    const [summaryId, setSummaryId] = useState<number | null>(null);
-    const [status, setStatus] = useState<SummaryStatus | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<Error | null>(null);
+    const { data, loading, error, refetch } =
+        useQuery<NoteLatestSummaryResponse>(NOTE_LATEST_SUMMARY_QUERY, {
+            variables: {
+                noteId: noteId?.toString(),
+            },
+            skip: noteId == null,
+            fetchPolicy: "cache-and-network",
+        });
 
-    // 요약 존재 여부 확인
-    useEffect(() => {
-        if (noteId == null) return;
+    const summary = data?.noteLatestSummary;
 
-        setLoading(true);
-        checkNoteSummary(noteId)
-            .then((response) => {
-                setSummaryId(response.summaryId);
-                setStatus(response.status);
-            })
-            .catch((err) => {
-                console.error(" [useNoteSummary] Check Error:", err);
-                setError(err);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-    }, [noteId]);
-
-    // 요약 상세 조회 (GraphQL)
-    const {
-        summary,
-        loading: summaryLoading,
-        error: summaryError,
-    } = useSummaryView(summaryId ?? undefined);
-
-    const refetch = async () => {
-        if (noteId == null) return;
-
-        setLoading(true);
-        try {
-            const response = await checkNoteSummary(noteId);
-            setSummaryId(response.summaryId);
-            setStatus(response.status);
-        } catch (err) {
-            setError(err as Error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    // 요약이 있으면 히스토리 형태로 변환
+    const history: SummaryHistoryItem[] = summary
+        ? [
+            {
+                summaryId: summary.summaryId,
+                versionNo: 1, // 노트는 항상 버전 1
+                status: "COMPLETED" as SummaryStatus, // 조회 성공했으면 COMPLETED
+                createdAt: new Date().toISOString(),
+            },
+        ]
+        : [];
 
     return {
-        summaryId,
-        status,
-        summary,
-        loading: loading || summaryLoading,
-        error: error || summaryError,
+        history,
+        loading,
+        error,
         refetch,
     };
 }

@@ -13,7 +13,6 @@ import AlertDialog from "@/app/components/ui/modal/AlertDialog";
 import { RootState } from "@/store";
 import { AlertTriangle, Eye, EyeOff } from "lucide-react";
 import { changePassword } from "@/lib/rest/auth/auth.rest";
-// import { deleteAccount } from "@/lib/rest/auth/auth.rest"; // TODO 연결
 
 export default function AccountPanel() {
     const user = useSelector((state: RootState) => state.auth.user);
@@ -88,10 +87,10 @@ export default function AccountPanel() {
         }
     };
 
-    // 🔥 회원 탈퇴 확정
+    // 회원 탈퇴 확정
     const handleDeleteAccountConfirm = async () => {
         try {
-            // await deleteAccount(); // TODO API 연결
+            // await deleteAccount();
             setAlertMessage("회원 탈퇴가 완료되었습니다.");
         } catch {
             setAlertMessage("회원 탈퇴에 실패했습니다. 다시 시도해주세요.");

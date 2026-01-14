@@ -48,4 +48,18 @@ export const SUMMARY_HISTORY_QUERY = gql`
 `;
 
 //  노트 요약 히스토리 (REST API 사용) 
-// 백엔드에 GraphQL 쿼리가 없으므로 REST API로 대체
+// 노트 최신 요약 조회
+export const NOTE_LATEST_SUMMARY_QUERY = gql`
+  query NoteLatestSummary($noteId: ID!) {
+    noteLatestSummary(noteId: $noteId) {
+      summaryId
+      mainTopic
+      keyTakeaways
+      sections {
+        title
+        content
+      }
+      finalDocument
+    }
+  }
+`;

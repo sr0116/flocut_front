@@ -1,4 +1,3 @@
-// components/summary/SummaryProcessing.tsx
 "use client";
 
 import { Sparkles, Clock } from "lucide-react";

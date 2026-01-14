@@ -1,4 +1,3 @@
-// hooks/summaries/useNoteSummaryCheck.ts
 "use client";
 
 import { useState } from "react";

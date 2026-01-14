@@ -1,4 +1,3 @@
-// components/summary/SummaryVersionGrid.tsx
 "use client";
 
 import { ChevronLeft, ChevronRight, Trash2, XCircle } from "lucide-react";
