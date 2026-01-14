@@ -1,8 +1,10 @@
+// components/documents/DocumentContent.tsx
 "use client";
 
-import { Loader2, FileText } from "lucide-react";
+import { Loader2, FileText, AlertCircle } from "lucide-react";
 import { useFileText } from "@/hooks/files/useFileText";
 import SummaryRequestButton from "@/app/components/summary/SummaryRequestButton";
+import EmptyState from "@/app/components/ui/empty-state/EmptyState";
 
 type Props = {
     fileId: string;
@@ -23,25 +25,29 @@ export default function DocumentContent({ fileId, sessionId }: Props) {
 
     if (error) {
         return (
-            <div className="flex flex-col items-center justify-center h-full gap-4">
-                <div className="text-red-500 text-center">
-                    파일 원문을 불러오지 못했습니다.
-                </div>
-                <p className="text-xs text-text-muted-light dark:text-text-muted-dark">
-                    요약 기능만 사용 가능합니다
-                </p>
-            </div>
+            <EmptyState
+                title="파일을 불러올 수 없습니다"
+                description="파일 원문을 불러오지 못했습니다. 요약 기능만 사용 가능합니다."
+                icon={<AlertCircle size={48} className="text-red-500" />}
+                action={
+                    <SummaryRequestButton
+                        type="document"
+                        targetId={id}
+                        sessionId={sessionId}
+                        size="md"
+                    />
+                }
+            />
         );
     }
 
     if (!text || text.trim().length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center h-full gap-4">
-                <FileText size={40} className="opacity-20" />
-                <p className="text-sm text-text-muted-light dark:text-text-muted-dark">
-                    파일 내용이 비어있습니다
-                </p>
-            </div>
+            <EmptyState
+                title="파일 내용이 비어있습니다"
+                description="이 파일에는 텍스트 내용이 없습니다."
+                icon={<FileText size={48} className="opacity-20" />}
+            />
         );
     }
 
@@ -61,16 +67,18 @@ export default function DocumentContent({ fileId, sessionId }: Props) {
                     />
                 </div>
 
-                <pre className="
-                    whitespace-pre-wrap
-                    text-sm leading-relaxed
-                    border border-border-light dark:border-border-dark
-                    rounded-2xl p-6
-                    bg-surface-light dark:bg-surface-dark
-                    text-text-primary-light dark:text-text-primary-dark
-                ">
-                    {text || "내용이 없습니다."}
-                </pre>
+                <pre
+                    className="
+            whitespace-pre-wrap
+            text-sm leading-relaxed
+            border border-border-light dark:border-border-dark
+            rounded-2xl p-6
+            bg-surface-light dark:bg-surface-dark
+            text-text-primary-light dark:text-text-primary-dark
+          "
+                >
+          {text}
+        </pre>
             </section>
         </div>
     );

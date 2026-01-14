@@ -1,3 +1,4 @@
+// components/layout/WorkspaceLayout/workspace/panel/UnifiedPanel.tsx
 "use client";
 
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
@@ -57,20 +58,15 @@ export default function UnifiedPanel({
         type === "document" ? Number(id) : null
     );
 
+    // 초기화
     useEffect(() => {
-        // console.log("UnifiedPanel - fileName:", fileName);
-        // console.log("UnifiedPanel - type:", type);
-        // console.log("UnifiedPanel - id:", id);
-
         setCurrentTab("edit");
 
         if (type === "document") {
             if (fileName) {
                 const fileNameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
-                console.log("Setting title to:", fileNameWithoutExt);
                 setTitle(fileNameWithoutExt);
             } else {
-                console.log("fileName is undefined, setting title to '문서'");
                 setTitle("문서");
             }
             setContent(documentText || "");
@@ -80,6 +76,7 @@ export default function UnifiedPanel({
         }
     }, [id, type, documentText, fileName]);
 
+    // 저장 핸들러
     const handleSave = async () => {
         if (!handleSyncRef.current) return;
 
@@ -103,6 +100,7 @@ export default function UnifiedPanel({
         confirmNavigation(() => onClose());
     };
 
+    // 저장 완료 시 업데이트 전파
     useEffect(() => {
         const wasSaving = prevSavingRef.current;
         const isNowSaved = !saving && saved;
@@ -118,8 +116,8 @@ export default function UnifiedPanel({
         prevSavingRef.current = saving;
     }, [saving, saved, title, id, type, onUpdated]);
 
+    // 요약에서 노트 생성 시 콜백
     const handleNoteCreatedFromSummary = useCallback(() => {
-        // console.log(" 요약본으로 노트 생성됨!");
         if (onUpdated) {
             onUpdated({
                 noteId: 0,
@@ -129,6 +127,7 @@ export default function UnifiedPanel({
         }
     }, [onUpdated]);
 
+    // NoteContent Props
     const noteContentProps = useMemo(
         () => ({
             id,
@@ -155,10 +154,9 @@ export default function UnifiedPanel({
         [id, sessionId, onCreated]
     );
 
-    // console.log("UnifiedPanel - current title state:", title);
-
     return (
         <div className="h-full flex flex-col bg-white dark:bg-surface-dark">
+            {/* 헤더 */}
             <PanelHeader
                 type={type}
                 currentTab={currentTab}
@@ -174,7 +172,9 @@ export default function UnifiedPanel({
                 isMobile={isMobile}
             />
 
+            {/* 본문 */}
             <div className="flex-1 overflow-y-auto custom-scrollbar">
+                {/* 편집 탭 */}
                 {currentTab === "edit" && (
                     <>
                         {type === "note" && (
@@ -191,10 +191,15 @@ export default function UnifiedPanel({
                     </>
                 )}
 
+                {/* 요약 탭 */}
                 {currentTab === "summary" && (
                     <>
                         {type === "note" && (
-                            <NoteSummaryContent noteId={id} sessionId={sessionId} />
+                            <NoteSummaryContent
+                                noteId={id}
+                                sessionId={sessionId}
+                                onNoteCreated={handleNoteCreatedFromSummary}
+                            />
                         )}
 
                         {type === "document" && (
@@ -207,13 +212,16 @@ export default function UnifiedPanel({
                     </>
                 )}
 
+                {/* 비교 탭 */}
                 {currentTab === "compare" && <CompareComingSoon />}
 
-                {currentTab === "calendar" && type === "note" && (
-                    <CalendarContent noteId={id} />
-                )}
+                {/* 캘린더 탭 */}
+                {/*{currentTab === "calendar" && type === "note" && (*/}
+                {/*    <CalendarContent noteId={id} />*/}
+                {/*)}*/}
             </div>
 
+            {/* 푸터 (노트만) */}
             {type === "note" && (
                 <PanelFooter
                     saved={saved}

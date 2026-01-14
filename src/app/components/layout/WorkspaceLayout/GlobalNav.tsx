@@ -19,7 +19,7 @@ import {
 import CreateSessionModal from "@/app/components/sessions/CreateSessionModal";
 import SessionEditModal from "@/app/components/sessions/SessionEditModal";
 import SessionDeleteModal from "@/app/components/sessions/SessionDeleteModal";
-import { useMySessions } from "@/hooks/sessions/usrMySession";
+import { useMySessions } from "@/hooks/sessions/useMySession";
 
 export type NavMode = "full" | "icon";
 

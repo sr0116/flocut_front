@@ -1,3 +1,4 @@
+// components/notes/NoteSummaryContent.tsx
 "use client";
 
 import SummaryContent from "@/app/components/summary/SummaryContent";
@@ -18,7 +19,8 @@ export default function NoteSummaryContent({
 
     const { history, loading, refetch } = useSummaryHistory(
         id,
-        sessionId
+        sessionId,
+        "note" //  명시적으로 type 전달
     );
 
     return (

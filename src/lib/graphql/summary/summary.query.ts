@@ -1,6 +1,7 @@
+// lib/graphql/summary/summary.query.ts
 import { gql } from "@apollo/client";
 
-// 요약 단건 조회 (summaryId 기준)
+//  공통 요약 단건 조회 
 export const SUMMARY_VIEW_BY_ID_QUERY = gql`
   query DocumentSummaryViewBySummaryId($summaryId: ID!) {
     documentSummaryViewBySummaryId(summaryId: $summaryId) {
@@ -16,7 +17,7 @@ export const SUMMARY_VIEW_BY_ID_QUERY = gql`
   }
 `;
 
-// 요약 히스토리 조회
+//  문서 요약 히스토리 
 export const SUMMARY_HISTORY_QUERY = gql`
   query DocumentSummaryHistory(
     $fileId: ID!
@@ -45,3 +46,6 @@ export const SUMMARY_HISTORY_QUERY = gql`
     }
   }
 `;
+
+//  노트 요약 히스토리 (REST API 사용) 
+// 백엔드에 GraphQL 쿼리가 없으므로 REST API로 대체

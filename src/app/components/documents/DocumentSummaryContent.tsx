@@ -1,3 +1,4 @@
+// components/documents/DocumentSummaryContent.tsx
 "use client";
 
 import SummaryContent from "@/app/components/summary/SummaryContent";
@@ -16,7 +17,8 @@ export default function DocumentSummaryContent({
                                                }: Props) {
     const { history, loading, refetch } = useSummaryHistory(
         fileId,
-        sessionId
+        sessionId,
+        "document" // 명시적으로 type 전달
     );
 
     return (
