@@ -43,14 +43,14 @@ export default function TabBar({ type, currentTab, onChangeTab }: Props) {
                 compact={isCompact}
             />
 
-            <TabButton
-                label="일정"
-                icon={<Calendar size={14} />}
-                active={currentTab === "calendar"}
-                onClick={() => onChangeTab("calendar")}
-                disabled={type !== "note"}
-                compact={isCompact}
-            />
+            {/*<TabButton*/}
+            {/*    label="일정"*/}
+            {/*    icon={<Calendar size={14} />}*/}
+            {/*    active={currentTab === "calendar"}*/}
+            {/*    onClick={() => onChangeTab("calendar")}*/}
+            {/*    disabled={type !== "note"}*/}
+            {/*    compact={isCompact}*/}
+            {/*/>*/}
         </div>
     );
 }
