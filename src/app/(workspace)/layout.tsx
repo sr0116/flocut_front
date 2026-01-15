@@ -87,6 +87,7 @@ export default function WorkspaceLayout({
                             mode={navViewMode}
                             selectedSessionId={selectedSessionId}
                             onSessionSelect={(id) => {
+                                // 설정 모달 루트일 때는 세션 선택 방지 로직 유지
                                 if (isModalRoute) return;
                                 setSelectedSessionId(id);
                                 if (isMobile) setNavMode("hidden");
@@ -99,6 +100,7 @@ export default function WorkspaceLayout({
                 {/* 메인 영역 */}
                 <main className="flex-1 min-w-0 min-h-0 overflow-hidden relative z-10">
                     {children}
+                    {/* Portal을 사용하지 않는 경우를 대비한 root 엘리먼트 유지 */}
                     <div id="workspace-floating-root" className="relative z-[100]" />
                 </main>
             </div>
