@@ -49,7 +49,6 @@ export default function GlobalNav({
     const { sessions, refetch } = useMySessions();
     const showLabel = mode === "full";
 
-    /* ===== 무한 렌더링 방지 ===== */
     useEffect(() => {
         if (sessions.length === localSessions.length) {
             const same = sessions.every(
@@ -60,7 +59,6 @@ export default function GlobalNav({
         setLocalSessions(sessions);
     }, [sessions]);
 
-    /* ===== Drag ===== */
     const handleDragStart = (index: number, e: React.DragEvent) => {
         setDraggedIndex(index);
 
@@ -89,15 +87,13 @@ export default function GlobalNav({
         <aside
             className={`
                 h-full flex-shrink-0
-                bg-surface-light dark:bg-surface-dark
+                bg-white dark:bg-surface-dark
                 border-r border-border-light dark:border-border-dark
                 transition-all duration-300
                 ${showLabel ? "w-64" : "w-16"}
-                relative
             `}
         >
             <nav className="flex flex-col h-full overflow-hidden">
-                {/* Header */}
                 <div className="h-14 flex items-center justify-between px-3 border-b border-border-light dark:border-border-dark">
                     {showLabel && (
                         <span className="font-bold text-lg truncate text-accent">
@@ -120,7 +116,6 @@ export default function GlobalNav({
                     )}
                 </div>
 
-                {/* Scroll */}
                 <div className="flex-1 overflow-y-auto thin-scrollbar">
                     <div className="p-2 space-y-4">
                         <div className="space-y-1">
@@ -135,12 +130,6 @@ export default function GlobalNav({
                                 label="캘린더"
                                 showLabel={showLabel}
                                 onClick={() => router.push("/calendar")}
-                            />
-                            <NavButton
-                                icon={Home}
-                                label="내 프로젝트"
-                                showLabel={showLabel}
-                                onClick={() => router.push("/workspace/sessions")}
                             />
                         </div>
 
@@ -192,7 +181,6 @@ export default function GlobalNav({
                     </div>
                 </div>
 
-                {/* Footer */}
                 <div className="p-2 border-t border-border-light dark:border-border-dark space-y-1">
                     <NavButton
                         icon={Trash2}
@@ -220,8 +208,6 @@ export default function GlobalNav({
         </aside>
     );
 }
-
-/* ======================= Session Item ============================ */
 
 function SessionItem({
                          session,
@@ -259,7 +245,6 @@ function SessionItem({
     const menuButtonRef = useRef<HTMLButtonElement>(null);
     const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
 
-    /* 제목 잘림 체크 */
     useEffect(() => {
         if (!titleRef.current) return;
         setIsTruncated(
@@ -267,7 +252,6 @@ function SessionItem({
         );
     }, [session.sessionTitle, showLabel]);
 
-    /* 드롭다운 위치 (FIXED) */
     useEffect(() => {
         if (!showMenu || !menuButtonRef.current) return;
 
@@ -287,7 +271,7 @@ function SessionItem({
                     ? window.innerHeight - rect.top + 6
                     : undefined,
             right: window.innerWidth - rect.right,
-            zIndex: 9999,
+            zIndex: 50,
         });
     }, [showMenu]);
 
@@ -370,14 +354,14 @@ function SessionItem({
             {showMenu && (
                 <>
                     <div
-                        className="fixed inset-0 z-[9998]"
+                        className="fixed inset-0 z-40"
                         onClick={() => setShowMenu(false)}
                     />
                     <div
                         style={menuStyle}
                         className="
                             min-w-[140px] py-1 rounded-lg shadow-xl
-                            bg-surface-light dark:bg-surface-dark
+                            bg-white dark:bg-surface-dark
                             border border-border-light dark:border-border-dark
                         "
                     >
@@ -442,8 +426,6 @@ function SessionItem({
         </div>
     );
 }
-
-/* ======================= Shared UI =============================== */
 
 function NavButton({
                        icon: Icon,

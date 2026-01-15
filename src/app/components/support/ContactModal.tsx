@@ -77,7 +77,7 @@ export default function ContactModal({ open, onClose }: ContactModalProps) {
         flex items-start sm:items-center   /* 모바일 상단 / 데스크탑 중앙 */
         justify-center
         px-4
-        overflow-y-auto                    /*  모바일 필수 */
+
       "
             onClick={onClose}
         >

@@ -334,7 +334,7 @@ export default function WorkspacePage() {
                                 </p>
                             </div>
                         ) : (
-                            <div className="space-y-2 max-h-[220px] overflow-y-auto">
+                            <div className="space-y-2 max-h-[220px] ">
                                 {recentFiles.slice(0, 5).map((file) => (
                                     <div
                                         key={file.fileId}
