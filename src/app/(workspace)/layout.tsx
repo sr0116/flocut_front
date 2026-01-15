@@ -33,6 +33,9 @@ export default function WorkspaceLayout({
 
     const authCheckedRef = useRef(false);
 
+    // 현재 경로가 설정 모달 경로인지 확인
+    const isModalRoute = pathname.startsWith("/settings");
+
     useEffect(() => {
         if (authCheckedRef.current) return;
         authCheckedRef.current = true;
@@ -60,7 +63,6 @@ export default function WorkspaceLayout({
     if (status === "checking") return null;
     if (status !== "authenticated" || !user) return null;
 
-    const isModalRoute = pathname.startsWith("/settings");
     const navViewMode: "full" | "icon" = navMode === "icon" ? "icon" : "full";
 
     const handleManualToggle = () => {
@@ -73,34 +75,37 @@ export default function WorkspaceLayout({
         <div className="h-screen flex flex-col bg-background-light dark:bg-background-dark">
             <WorkspaceHeader onMenuClick={() => setNavMode("full")} />
             <div className="flex flex-1 min-h-0 relative">
-                {/* 모바일용 배경 오버레이 */}
-                {isMobile && navMode === "full" && (
-                    <div
-                        className="fixed inset-0 top-14 z-[60] bg-black/20 backdrop-blur-sm"
-                        onClick={() => setNavMode("hidden")}
-                    />
+
+                {/*  설정 모달이 아닐 때만 글로벌 네비게이션 및 오버레이 렌더링 */}
+                {!isModalRoute && (
+                    <>
+                        {/* 모바일용 배경 오버레이 */}
+                        {isMobile && navMode === "full" && (
+                            <div
+                                className="fixed inset-0 top-14 z-[60] bg-black/20 backdrop-blur-sm"
+                                onClick={() => setNavMode("hidden")}
+                            />
+                        )}
+
+                        {navMode !== "hidden" && (
+                            <aside className="relative flex-shrink-0 z-40 transition-all duration-300">
+                                <GlobalNav
+                                    mode={navViewMode}
+                                    selectedSessionId={selectedSessionId}
+                                    onSessionSelect={(id) => {
+                                        setSelectedSessionId(id);
+                                        if (isMobile) setNavMode("hidden");
+                                    }}
+                                    onToggle={!isMobile ? handleManualToggle : undefined}
+                                />
+                            </aside>
+                        )}
+                    </>
                 )}
 
-                {navMode !== "hidden" && (
-                    <aside className="relative flex-shrink-0 z-40 transition-all duration-300">
-                        <GlobalNav
-                            mode={navViewMode}
-                            selectedSessionId={selectedSessionId}
-                            onSessionSelect={(id) => {
-                                // 설정 모달 루트일 때는 세션 선택 방지 로직 유지
-                                if (isModalRoute) return;
-                                setSelectedSessionId(id);
-                                if (isMobile) setNavMode("hidden");
-                            }}
-                            onToggle={!isMobile ? handleManualToggle : undefined}
-                        />
-                    </aside>
-                )}
-
-                {/* 메인 영역 */}
-                <main className="flex-1 min-w-0 min-h-0 overflow-hidden relative z-10">
+                {/* 메인 영역: 설정 모달 시 z-index를 높여 네비게이션 위로 올림 */}
+                <main className={`flex-1 min-w-0 min-h-0 overflow-hidden relative ${isModalRoute ? 'z-[70]' : 'z-10'}`}>
                     {children}
-                    {/* Portal을 사용하지 않는 경우를 대비한 root 엘리먼트 유지 */}
                     <div id="workspace-floating-root" className="relative z-[100]" />
                 </main>
             </div>

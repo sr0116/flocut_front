@@ -74,10 +74,10 @@ export default function ContactModal({ open, onClose }: ContactModalProps) {
         <div
             className="
         fixed inset-0 z-50
-        flex items-start sm:items-center
+        flex items-start sm:items-center   /* 모바일 상단 / 데스크탑 중앙 */
         justify-center
         px-4
-        overflow-y-auto
+        overflow-y-auto                    /*  모바일 필수 */
       "
             onClick={onClose}
         >
@@ -94,8 +94,8 @@ export default function ContactModal({ open, onClose }: ContactModalProps) {
           border border-slate-200 dark:border-slate-700
           shadow-2xl
           overflow-hidden
-          mt-6 sm:mt-0
-          max-h-[calc(100dvh-3rem)]
+          mt-6 sm:mt-0           /*  모바일 상단 여백 */
+          max-h-[calc(100dvh-3rem)]  /*  모바일 헤더 보장 */
           flex flex-col
         "
             >

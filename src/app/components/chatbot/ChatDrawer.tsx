@@ -72,7 +72,7 @@ export default function ChatDrawer() {
             padding="none"
             className="
         fixed z-50 flex flex-col
-        inset-x-0 top-0 bottom-0
+        top-0 bottom-0 inset-x-0
         w-full
 
         sm:top-auto sm:bottom-24 sm:right-6 sm:left-auto
@@ -100,7 +100,7 @@ export default function ChatDrawer() {
                 </div>
             </div>
 
-            {/* Chat Scroll Area */}
+            {/* Chat scroll area */}
             <div className="flex-1 overflow-y-auto">
                 <ChatContainer
                     messages={messages}
