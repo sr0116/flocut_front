@@ -24,7 +24,7 @@ export default function ChatDrawer() {
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
+    }, [messages, loading]);
 
     if (!chatOpen) return null;
 
@@ -37,9 +37,7 @@ export default function ChatDrawer() {
         try {
             const res = await fetch("/api/chat/public", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     messages: [...messages, { role: "user", content: text }],
                 }),
@@ -51,7 +49,9 @@ export default function ChatDrawer() {
                 addMessage({
                     role: "assistant",
                     content: data.content,
-                    cta: data.content.includes("워크스페이스") ? "workspace" : undefined,
+                    cta: data.content.includes("워크스페이스")
+                        ? "workspace"
+                        : undefined,
                 })
             );
         } catch {
@@ -71,17 +71,19 @@ export default function ChatDrawer() {
         <Card
             padding="none"
             className="
-    fixed z-50 flex flex-col
-    bottom-0 right-0
-    w-full h-[100dvh]
+        fixed z-50 flex flex-col
+        inset-x-0 top-0 bottom-0
+        w-full
 
-    sm:bottom-24 sm:right-6
-    sm:w-[380px] sm:h-[520px]
-  "
+        sm:top-auto sm:bottom-24 sm:right-6 sm:left-auto
+        sm:w-[380px] sm:h-[520px]
+      "
         >
             {/* Header */}
             <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-border-light dark:border-border-dark">
-                <span className="text-sm font-semibold">FloCut AI Assistant</span>
+        <span className="text-sm font-semibold">
+          FloCut AI Assistant
+        </span>
 
                 <div className="flex items-center gap-2">
                     <button
@@ -98,7 +100,7 @@ export default function ChatDrawer() {
                 </div>
             </div>
 
-            {/* Chat (스크롤 영역) */}
+            {/* Chat Scroll Area */}
             <div className="flex-1 overflow-y-auto">
                 <ChatContainer
                     messages={messages}
@@ -107,7 +109,7 @@ export default function ChatDrawer() {
                 />
             </div>
 
-            {/* Input (항상 하단 고정) */}
+            {/* Input */}
             <div className="shrink-0 border-t border-border-light dark:border-border-dark">
                 <InputBar onSend={sendMessage} disabled={loading} />
             </div>
