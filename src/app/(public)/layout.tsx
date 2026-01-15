@@ -4,6 +4,7 @@ import Header from "@/app/components/layout/Header";
 import Footer from "@/app/components/layout/Footer";
 import FloatingChatButton from "@/app/components/chatbot/FloatingChatButton";
 import ChatDrawer from "@/app/components/chatbot/ChatDrawer";
+import GlobalLoader from "@/app/components/layout/loading/GlobalLoader";
 
 export const metadata: Metadata = {
   title: "FLOCUT",
@@ -20,6 +21,7 @@ export default async function PublicLayout({
     <>
       <Header  />
       <main className="min-h-screen pt-16">
+        <GlobalLoader />
           {children}
       </main>
       {/* 챗봇*/}
