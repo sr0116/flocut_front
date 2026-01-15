@@ -105,7 +105,7 @@ export default function DocumentContent({ fileId, sessionId }: Props) {
       {/* 컨펌 다이얼로그 */}
       {isConfirmOpen && (
         <>
-          <ModalOverlay onClose={() => setIsConfirmOpen(false)} />
+          {/*<ModalOverlay onClose={() => setIsConfirmOpen(false)} />*/}
           <ConfirmDialog
             open={isConfirmOpen}
             title="AI 요약 요청"

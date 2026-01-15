@@ -173,27 +173,26 @@ function NoteContent({
         )}
       </div>
 
-      {/* 에디터 메인 영역 */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar bg-white dark:bg-background-dark">
-        <div className="max-w-4xl mx-auto px-8 sm:px-12 lg:px-16 py-10">
-          {/* 제목 입력 */}
-          <NoteTitleInput
-            value={localTitle}
-            onChange={handleTitleChange}
-          />
+        {/* 에디터 메인 영역 */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden bg-white dark:bg-background-dark">
+            <div className="max-w-4xl w-full min-w-0 mx-auto px-8 sm:px-12 lg:px-16 py-10">
+                <NoteTitleInput
+                    value={localTitle}
+                    onChange={handleTitleChange}
+                />
 
-          {/* 본문 에디터 - 가독성을 위한 여백 및 스타일링 */}
-          <div className="mt-8">
-            <NoteContentEditor
-              content={localContent}
-              onChange={handleContentChange}
-              onEditorReady={setEditor}
-            />
-          </div>
+                <div className="mt-8">
+                    <NoteContentEditor
+                        content={localContent}
+                        onChange={handleContentChange}
+                        onEditorReady={setEditor}
+                    />
+                </div>
+            </div>
         </div>
-      </div>
 
-      {/* 음성 녹음 패널 */}
+
+        {/* 음성 녹음 패널 */}
       {showVoiceRecorder && (
         <VoiceRecorderPanel
           open={showVoiceRecorder}
@@ -205,7 +204,7 @@ function NoteContent({
       {/* 요약 요청 컨펌 다이얼로그 */}
       {isConfirmOpen && (
         <>
-          <ModalOverlay onClose={() => setIsConfirmOpen(false)} />
+          {/*<ModalOverlay onClose={() => setIsConfirmOpen(false)} />*/}
           <ConfirmDialog
             open={isConfirmOpen}
             title="노트 요약 생성"
