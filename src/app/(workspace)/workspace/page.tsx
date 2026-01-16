@@ -133,6 +133,7 @@ export default function WorkspacePage() {
                 })}
               </p>
             </div>
+
           </div>
 
           {/* 통계 카드 그리드 */}
@@ -290,8 +291,8 @@ export default function WorkspacePage() {
                   value={sortBy}
                   onChange={(v) => setSortBy(v as any)}
                   options={[
-                    { value: "latest", label: "최신순", icon: <SortDesc className="w-4 h-4" /> },
-                    { value: "oldest", label: "과거순", icon: <SortAsc className="w-4 h-4" /> },
+                    { value: "latest", label: "과거순", icon: <SortDesc className="w-4 h-4" /> },
+                    { value: "oldest", label: "최신순", icon: <SortAsc className="w-4 h-4" /> },
                   ]}
                   size="md"
                   className="flex-1 sm:flex-none"
