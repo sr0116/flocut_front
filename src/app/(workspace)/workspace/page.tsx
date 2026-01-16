@@ -133,10 +133,6 @@ export default function WorkspacePage() {
                 })}
               </p>
             </div>
-            <Button onClick={() => setOpenCreate(true)} className="gap-2 w-full sm:w-auto shadow-md">
-              <Plus className="w-4 h-4" />
-              새 세션 생성
-            </Button>
           </div>
 
           {/* 통계 카드 그리드 */}
