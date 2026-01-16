@@ -72,7 +72,7 @@ export default function FindEmailForm() {
                 {/* Card */}
                 <div className="p-8 rounded-2xl bg-white border shadow-xl">
                     {isSuccess ? (
-                        // ✅ 성공 화면
+                        //  성공 화면
                         <div className="text-center">
                             <CheckCircle2 className="mx-auto mb-4 text-accent" size={40} />
                             <h3 className="text-xl font-bold mb-2">
